@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest manifest-version="0.1" xmlns="http://www.tableau.com/xml/extension_manifest">
+  <dashboard-extension id="com.boonthavorn.universe-overview" extension-version="1.0.0">
+    <default-locale>en_US</default-locale>
+    <name resource-id="name"/>
+    <description>Universe Overview — Sales Performance dashboard by Universe tier (ECO / MASS / PREMIUM / LUXURY)</description>
+    <author name="Warinda" email="warinda.nor@boonthavorn.com" organization="Boonthavorn" website="https://github.com/warinda-nor"/>
+    <min-api-version>1.4</min-api-version>
+    <source-location>
+      <url>http://localhost:8765/index.html</url>
+    </source-location>
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAAdklEQVR4nK3MwQ3AIAwDQA/BAny7A3t10s7DAwlRCiGxK1my/Tlc99OSclGCDonWC1IspFx+sdBKt9CXaGE8ioXp09YM0dYC4qw1RFhbKGpZUMg6QH7rDDktF+SxvNDRCkC2FYMMKwztLAZaWiT0tXhosiRotCqtlnU8Dm8RHQAAAABJRU5ErkJggg==</icon>
+    <permissions>
+      <permission>full data</permission>
+    </permissions>
+  </dashboard-extension>
+  <resources>
+    <resource id="name">
+      <text locale="en_US">Universe Overview</text>
+    </resource>
+  </resources>
+</manifest>

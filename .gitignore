@@ -1,0 +1,20 @@
+# Source data files — contain real company sales/vendor/pricing data, never push these
+*.xlsx
+*.xls
+*.csv
+
+# Data preview — the embedded DATA object is a full real-data snapshot (Net Sales,
+# article/vendor names, growth %) baked into static HTML. Local-only, never push.
+preview/
+
+# Reference/scratch files not part of the extension deliverable
+2026-08-21_17-06-47.jpg
+Dashboard_Extension
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor/tooling junk
+.vscode/
+node_modules/

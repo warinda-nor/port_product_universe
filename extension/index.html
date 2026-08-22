@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universe Overview</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:            #f9f9f7;
+    --surface-1:       #fcfcfb;
+    --text-primary:    #0b0b0b;
+    --text-secondary:  #52514e;
+    --text-muted:      #898781;
+    --grid:            #e1e0d9;
+    --baseline:        #c3c2b7;
+    --border:          rgba(11,11,11,0.10);
+    --series-accent:   #2a78d6;
+    --good:            #006300;
+    --critical:        #d03b3b;
+    --navy:            #14213d;
+    --navy-2:          #1c2d52;
+    --uni-eco:         #90dbc7;
+    --uni-mass:        #86c6f2;
+    --uni-premium:     #ffdbc0;
+    --uni-luxury:      #d3b3e9;
+    --uni-eco-wash:    rgba(144,219,199,0.18);
+    --uni-mass-wash:   rgba(134,198,242,0.18);
+    --uni-premium-wash:rgba(255,219,192,0.24);
+    --uni-luxury-wash: rgba(211,179,233,0.20);
+    --tt-text:         #0b0b0b;
+    --tt-text-muted:   rgba(11,11,11,0.62);
+    --tt-good:         #0a7a2e;
+    --tt-bad:          #c22f2f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page:            #0d0d0d;
+      --surface-1:       #1a1a19;
+      --text-primary:    #ffffff;
+      --text-secondary:  #c3c2b7;
+      --text-muted:      #898781;
+      --grid:            #2c2c2a;
+      --baseline:        #383835;
+      --border:          rgba(255,255,255,0.10);
+      --series-accent:   #3987e5;
+      --good:            #0ca30c;
+      --critical:        #e66767;
+      --navy:            #0c1424;
+      --navy-2:          #14213d;
+      --uni-eco:         #90dbc7;
+      --uni-mass:        #86c6f2;
+      --uni-premium:     #ffdbc0;
+      --uni-luxury:      #d3b3e9;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:            #0d0d0d;
+    --surface-1:       #1a1a19;
+    --text-primary:    #ffffff;
+    --text-secondary:  #c3c2b7;
+    --text-muted:      #898781;
+    --grid:            #2c2c2a;
+    --baseline:        #383835;
+    --border:          rgba(255,255,255,0.10);
+    --series-accent:   #3987e5;
+    --good:            #0ca30c;
+    --critical:        #e66767;
+    --navy:            #0c1424;
+    --navy-2:          #14213d;
+    --uni-eco:         #90dbc7;
+    --uni-mass:        #86c6f2;
+    --uni-premium:     #ffdbc0;
+    --uni-luxury:      #d3b3e9;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 0 0 32px; }
+
+  .banner { display: none; border-bottom: 1px solid var(--border); font-size: 12.5px; padding: 8px 24px; text-align: center; }
+  .banner.status { display: block; background: var(--uni-mass-wash); color: var(--text-secondary); }
+  .banner.error { display: block; background: rgba(208,59,59,0.14); color: var(--critical); font-weight: 700; }
+
+  header.topbar {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand .mark {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .brand h1 { font-size: 22px; margin: 0; letter-spacing: 0.02em; font-weight: 700; }
+  .brand p { margin: 3px 0 0; font-size: 14px; color: rgba(255,255,255,0.72); }
+
+  .asof-footer { font-size: 12.5px; color: var(--text-muted); text-align: right; white-space: nowrap; padding: 8px 24px 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; padding: 20px 24px 0; }
+  .col-3 { grid-column: span 3; }
+  .col-4 { grid-column: span 4; }
+  .col-6 { grid-column: span 6; }
+  .col-12 { grid-column: span 12; }
+  @media (max-width: 900px) {
+    .col-3, .col-4, .col-6 { grid-column: span 12; }
+  }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .row-4060 { display: grid; grid-template-columns: 40% 60%; gap: 16px; }
+  @media (max-width: 900px) { .row-4060 { grid-template-columns: 1fr; } }
+  .row-universe-h { min-height: 300px; }
+  #chart-universeDonut { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
+  .card h3 { font-size: 15px; margin: 0 0 2px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-primary); font-weight: 700; }
+  .card p.sub { margin: 0 0 12px; font-size: 13px; color: var(--text-muted); }
+
+  .card-head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .toggle-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; cursor: pointer; flex: none; }
+  .toggle-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 700; }
+  .toggle-switch { position: relative; display: inline-block; width: 34px; height: 19px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--grid); border-radius: 20px; transition: background 0.15s; }
+  .toggle-slider::before { content: ""; position: absolute; height: 15px; width: 15px; left: 2px; top: 2px; background: #fff; border-radius: 50%; box-shadow: 0 1px 2px rgba(11,11,11,0.25); transition: transform 0.15s; }
+  .toggle-switch input:checked + .toggle-slider { background: var(--series-accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(15px); }
+
+  .univ-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 6px; }
+  .univ-col { padding: 0 18px; min-width: 0; }
+  .univ-col:first-child { padding-left: 0; }
+  .univ-col:last-child { padding-right: 0; }
+  .univ-col:not(:first-child) { border-left: 1px solid var(--grid); }
+  .univ-col-head { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px; }
+  .univ-col-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .univ-top-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+  .univ-kpi-value { font-size: 20px; font-weight: 700; line-height: 1.15; }
+  .univ-kpi-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 5px; }
+  .univ-kpi-delta { font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 3px; }
+  .univ-kpi-delta.good { color: var(--good); }
+  .univ-kpi-delta.bad { color: var(--critical); }
+  .univ-kpi-prior { font-size: 10.5px; color: var(--text-muted); }
+  .univ-spark { flex: none; cursor: crosshair; }
+  .univ-spark-pt { cursor: crosshair; }
+  .univ-pg-list { display: flex; flex-direction: column; gap: 9px; }
+  .univ-pg-label-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--text-secondary); margin-bottom: 3px; }
+  .univ-pg-label-row .name { font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .univ-pg-label-row .val { flex: none; color: var(--text-muted); }
+  .univ-pg-track { height: 11px; border-radius: 5px; background: var(--grid); overflow: hidden; }
+  .univ-pg-fill { height: 100%; border-radius: 5px; }
+
+  .kpi-row { display: flex; align-items: center; gap: 16px; }
+  .kpi-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--series-accent-wash, rgba(42,120,214,0.14)); display: flex; align-items: center; justify-content: center; flex: none; }
+  .kpi-text { display: flex; flex-direction: column; min-width: 0; }
+  .kpi-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
+  .kpi-value { font-size: 30px; font-weight: 700; line-height: 1.15; margin-top: 4px; }
+  .kpi-delta { font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+  .kpi-delta.good { color: var(--good); }
+  .kpi-delta.bad { color: var(--critical); }
+  .kpi-prior { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  #table-universe { overflow-x: auto; }
+  #table-universe .uni-tag { font-weight: 400; }
+  #table-universe .growth.good, #table-universe .growth.bad { font-weight: 400; }
+  #table-topProducts { overflow-x: auto; }
+  #table-topProducts table.data-table { min-width: 1400px; }
+  table.data-table .prod-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; background: var(--grid); display: block; }
+  table.data-table tr.row-eco { background: linear-gradient(180deg, color-mix(in srgb, var(--uni-eco) 10%, transparent), color-mix(in srgb, var(--uni-eco) 3%, transparent)); backdrop-filter: blur(6px); }
+  table.data-table tr.row-mass { background: linear-gradient(180deg, color-mix(in srgb, var(--uni-mass) 10%, transparent), color-mix(in srgb, var(--uni-mass) 3%, transparent)); backdrop-filter: blur(6px); }
+  table.data-table tr.row-premium { background: linear-gradient(180deg, color-mix(in srgb, var(--uni-premium) 12%, transparent), color-mix(in srgb, var(--uni-premium) 4%, transparent)); backdrop-filter: blur(6px); }
+  table.data-table tr.row-luxury { background: linear-gradient(180deg, color-mix(in srgb, var(--uni-luxury) 12%, transparent), color-mix(in srgb, var(--uni-luxury) 4%, transparent)); backdrop-filter: blur(6px); }
+  #table-universe table.data-table { min-width: 640px; font-size: 14px; }
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.data-table th {
+    text-align: right; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-muted); font-weight: 700; padding: 6px 9px; border-bottom: 1px solid var(--grid);
+  }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+  table.data-table td { padding: 9px 9px; border-bottom: 1px solid var(--grid); color: var(--text-secondary); }
+  table.data-table td.num, table.data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data-table th.left { text-align: left; }
+  table.data-table tr:hover td { background: rgba(42,120,214,0.06); }
+  table.data-table tr.total-row td { font-weight: 700; color: var(--text-primary); border-top: 2px solid var(--grid); }
+  table.data-table td.rank { color: var(--text-muted); width: 26px; }
+  table.data-table td.name { color: var(--text-primary); font-weight: 600; max-width: 280px; }
+  .uni-tag { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
+  .uni-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .growth.good { color: var(--good); font-weight: 700; }
+  .growth.bad { color: var(--critical); font-weight: 700; }
+
+  .stackbar-row { display: grid; grid-template-columns: 130px 1fr 80px; align-items: center; gap: 10px; padding: 8px 0; }
+  .stackbar-row.with-growth { grid-template-columns: 130px 1fr 80px 80px; }
+  .stackbar-header-row { padding-bottom: 4px; border-bottom: 1px solid var(--grid); }
+  .stackbar-header-row .col-header { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 700; text-align: right; }
+  .stackbar-growth { text-align: right; font-size: 12.5px; font-weight: 400; font-variant-numeric: tabular-nums; }
+  .stackbar-growth.good { color: var(--good); }
+  .stackbar-growth.bad { color: var(--critical); }
+  .stackbar-row .rowlabel { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+  #chart-brandUniverse .rowlabel { font-weight: 400; }
+  .stackbar-track { display: flex; height: 26px; border-radius: 5px; overflow: hidden; background: var(--grid); }
+  .stackbar-seg { display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: #0b0b0b; font-weight: 700; white-space: nowrap; overflow: hidden; cursor: crosshair; }
+  .stackbar-seg:hover { filter: brightness(1.12); }
+  .stackbar-total { text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: var(--text-muted); }
+  .legend-row .li { display: flex; align-items: center; gap: 6px; }
+  .legend-row .sw { width: 10px; height: 10px; border-radius: 50%; }
+  .axis-row { display: grid; grid-template-columns: 130px 1fr 80px; font-size: 10.5px; color: var(--text-muted); margin-top: 4px; }
+  .axis-row .ticks { display: flex; justify-content: space-between; }
+
+  .donut-seg { cursor: crosshair; }
+  .donut-seg:hover { filter: brightness(1.1); }
+
+  .tooltip {
+    position: fixed;
+    display: none;
+    z-index: 999;
+    pointer-events: none;
+    color: var(--tt-text);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    max-width: 240px;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.42));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow:
+      0 10px 30px rgba(11,11,11,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.85),
+      inset 0 0 0 1px rgba(255,255,255,0.3);
+  }
+  .tooltip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 60% at 15% 0%, rgba(255,255,255,0.65), transparent 60%);
+    pointer-events: none;
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .tooltip { background: rgba(255,255,255,0.96); }
+  }
+  .tooltip .tt-title { position: relative; display: flex; align-items: center; gap: 7px; font-weight: 700; margin-bottom: 6px; font-size: 12.5px; color: var(--tt-text); }
+  .tooltip .tt-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .tooltip .tt-row { position: relative; display: flex; justify-content: space-between; gap: 14px; color: var(--tt-text-muted); }
+  .tooltip .tt-row b { color: var(--tt-text); font-weight: 700; }
+  .tooltip .tt-row b.good { color: var(--tt-good); }
+  .tooltip .tt-row b.bad { color: var(--tt-bad); }
+
+  .field-error-list { text-align: left; max-width: 640px; margin: 8px auto 0; font-weight: 400; }
+  .field-error-list li { margin: 2px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="banner status" id="statusBanner">Connecting to Tableau…</div>
+  <div class="banner error" id="errorBanner"></div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-4 4 8 2-4h4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1>UNIVERSE OVERVIEW</h1>
+        <p id="subtitle">Sales Performance</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card col-3" id="kpi-netSales"></div>
+    <div class="card col-3" id="kpi-qty"></div>
+    <div class="card col-3" id="kpi-sku"></div>
+    <div class="card col-3" id="kpi-asp"></div>
+
+    <div class="col-12 row-4060">
+      <div class="card row-universe-h">
+        <h3>Sales by Universe</h3>
+        <p class="sub">Share of Net Sales by Universe (excluded UNCLASSIFIED)</p>
+        <div id="chart-universeDonut"></div>
+      </div>
+      <div class="card row-universe-h">
+        <h3>Sales by Universe - Detail</h3>
+        <p class="sub">Net Sales, Sales Qty, SKU Count and %Share</p>
+        <div id="table-universe"></div>
+      </div>
+    </div>
+
+    <div class="card col-6">
+      <div class="card-head-row">
+        <div>
+          <h3 id="pg-card-title">Sales by Product Group Mer and Universe</h3>
+          <p class="sub" id="pg-card-sub">%Share Sales within Product Group Mer</p>
+        </div>
+        <label class="toggle-wrap">
+          <span class="toggle-label">Product Group</span>
+          <span class="toggle-switch">
+            <input type="checkbox" id="pgToggle">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </div>
+      <div id="chart-pgUniverse"></div>
+    </div>
+    <div class="card col-6">
+      <h3>Sales by Brand and Universe</h3>
+      <p class="sub">Top 5 brands by Net Sales — % Share within Brand</p>
+      <div id="chart-brandUniverse"></div>
+    </div>
+
+    <div class="card col-12">
+      <h3>Universe Performance</h3>
+      <p class="sub">Net Sales trend and %Share Sales within Flag_PrivateBrand, by Universe (UNCLASSIFIED excluded)</p>
+      <div id="univ-detail-grid"></div>
+    </div>
+
+    <div class="card col-12">
+      <div class="card-head-row">
+        <div>
+          <h3>Top Products by Universe</h3>
+          <p class="sub" id="top-products-sub">Top 3 per Universe (UNCLASSIFIED excluded), ranked by Net Sales</p>
+        </div>
+        <label class="toggle-wrap">
+          <span class="toggle-label">Sales Qty</span>
+          <span class="toggle-switch">
+            <input type="checkbox" id="topProductsToggle">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
+      </div>
+      <div id="table-topProducts"></div>
+    </div>
+  </div>
+  <div class="asof-footer" id="asof">Data as of : —</div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script src="tableau.extensions.1.latest.js"></script>
+<script>
+
+/* ============================================================
+   FIELD MAPPING — must match the source Tableau field names
+   exactly (case-sensitive). If a worksheet is missing any of
+   these, the extension shows a named-field error instead of a
+   blank/broken dashboard.
+   ============================================================ */
+const DETAIL_FIELDS = [
+  'Sls Grp Desc', 'Article Id', 'Article Name Th', 'Product Group', 'Product Group Mer',
+  'Mc Desc', 'Brand', 'Vendor Name', 'Universe',
+  'Net Inc Tax - LY', 'Net Inc Tax - CY', 'Sales Qty - LY', 'Sales Qty - CY',
+];
+const TREND_FIELDS = [
+  'Day Month', 'Sls Ofc Desc', 'Flag_PrivateBrand', 'Universe',
+  'Net Inc Tax - CY', 'Net Inc Tax - LY', 'Sales Qty - CY', 'Sales Qty - LY',
+];
+const DETAIL_KEY_FIELD = 'Article Id';   // presence of this field identifies the Detail worksheet
+const TREND_KEY_FIELD = 'Day Month';     // presence of this field identifies the Trend worksheet
+
+const UNIVERSES = ['ECO', 'MASS', 'PREMIUM', 'LUXURY'];
+const UNIVERSE_KEYS = [...UNIVERSES, 'UNCLASSIFIED'];
+const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                      'August', 'September', 'October', 'November', 'December'];
+
+/* ============================================================
+   Status / error banner
+   ============================================================ */
+function setStatus(msg) {
+  const el = document.getElementById('statusBanner');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+function setError(worksheetName, missingFields) {
+  const el = document.getElementById('errorBanner');
+  setStatus('');
+  el.innerHTML = `Extension cannot load — worksheet "${worksheetName}" is missing required field(s):
+    <ul class="field-error-list">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>
+    Rename the field in Tableau (or update the constant in index.html's FIELD lists) to match, then refresh.`;
+  el.style.display = 'block';
+}
+function clearError() {
+  document.getElementById('errorBanner').style.display = 'none';
+}
+
+/* ============================================================
+   Tableau data access — DataTableReader with full pagination
+   (getSummaryDataAsync alone truncates on worksheets with more
+   than ~10k marks; both Detail and Trend routinely exceed that).
+   ============================================================ */
+function readWorksheetRows(worksheet) {
+  return worksheet.getSummaryDataReaderAsync(undefined, { ignoreSelection: true }).then(reader => {
+    const columns = reader.columns;
+    const pageCount = reader.pageCount;
+    let allData = [];
+    let chain = Promise.resolve();
+    for (let i = 0; i < pageCount; i++) {
+      chain = chain.then(() => reader.getPageAsync(i)).then(page => {
+        allData = allData.concat(page.data);
+      });
+    }
+    return chain.then(() => reader.releaseAsync()).then(() => {
+      const fieldIndex = {};
+      columns.forEach((c, i) => { fieldIndex[c.fieldName] = i; });
+      const rows = allData.map(dataRow => {
+        const obj = {};
+        columns.forEach((c, i) => { obj[c.fieldName] = dataRow[i].value; });
+        return obj;
+      });
+      return { rows, fieldNames: columns.map(c => c.fieldName) };
+    });
+  });
+}
+
+function findMissingFields(fieldNames, required) {
+  const have = new Set(fieldNames);
+  return required.filter(f => !have.has(f));
+}
+
+/* ============================================================
+   Aggregation — mirrors the offline aggregate2.py pipeline used
+   to build/validate this dashboard, now running on live rows
+   pulled straight from the Trend and Detail worksheets.
+   ============================================================ */
+function emptySegment() {
+  const seg = {};
+  UNIVERSE_KEYS.forEach(u => { seg[u] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 }; });
+  return seg;
+}
+function addTo(map, key) {
+  if (!map[key]) map[key] = emptySegment();
+  return map[key];
+}
+function num(v) { return (typeof v === 'number' && !isNaN(v)) ? v : 0; }
+
+function aggregateDetail(rows) {
+  const byUniverse = {};
+  UNIVERSE_KEYS.forEach(u => { byUniverse[u] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0, skuCy: new Set(), skuLy: new Set() }; });
+
+  const byPgUniverse = {}, pgTotalsCY = {}, pgTotalsLY = {};
+  const byPgMerUniverse = {}, pgMerTotalsCY = {}, pgMerTotalsLY = {};
+  const byBrandUniverse = {}, brandTotalsCY = {}, brandTotalsLY = {};
+  const articleAgg = {};
+
+  let netCYAll = 0, netLYAll = 0, qtyCYAll = 0;
+  const skuCYAll = new Set();
+
+  rows.forEach(row => {
+    if (row['Sls Grp Desc'] === 'Grand Total') return; // stray pivot-export total row, if present
+
+    const universe = row['Universe'] || 'UNCLASSIFIED';
+    const pg = row['Product Group'];
+    const pgMer = row['Product Group Mer'];
+    const brand = row['Brand'];
+    const artId = row['Article Id'];
+    const netCY = num(row['Net Inc Tax - CY']);
+    const netLY = num(row['Net Inc Tax - LY']);
+    const qtyCY = num(row['Sales Qty - CY']);
+    const qtyLY = num(row['Sales Qty - LY']);
+
+    netCYAll += netCY; netLYAll += netLY; qtyCYAll += qtyCY;
+    if (qtyCY > 0 && artId != null) skuCYAll.add(artId);
+
+    if (byUniverse[universe]) {
+      const bu = byUniverse[universe];
+      bu.netSalesCY += netCY; bu.netSalesLY += netLY; bu.qtyCY += qtyCY; bu.qtyLY += qtyLY;
+      if (qtyCY > 0 && artId != null) bu.skuCy.add(artId);
+      if (qtyLY > 0 && artId != null) bu.skuLy.add(artId);
+    }
+
+    if (pg && pg !== 'Total') {
+      const seg = addTo(byPgUniverse, pg)[universe] || (addTo(byPgUniverse, pg)[universe] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 });
+      seg.netSalesCY += netCY; seg.netSalesLY += netLY; seg.qtyCY += qtyCY;
+      pgTotalsCY[pg] = (pgTotalsCY[pg] || 0) + netCY;
+      pgTotalsLY[pg] = (pgTotalsLY[pg] || 0) + netLY;
+    }
+
+    if (pgMer && pgMer !== 'Total') {
+      const seg = addTo(byPgMerUniverse, pgMer)[universe] || (addTo(byPgMerUniverse, pgMer)[universe] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 });
+      seg.netSalesCY += netCY; seg.netSalesLY += netLY; seg.qtyCY += qtyCY;
+      pgMerTotalsCY[pgMer] = (pgMerTotalsCY[pgMer] || 0) + netCY;
+      pgMerTotalsLY[pgMer] = (pgMerTotalsLY[pgMer] || 0) + netLY;
+    }
+
+    if (brand && brand !== 'Total') {
+      const seg = addTo(byBrandUniverse, brand)[universe] || (addTo(byBrandUniverse, brand)[universe] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 });
+      seg.netSalesCY += netCY; seg.netSalesLY += netLY; seg.qtyCY += qtyCY;
+      brandTotalsCY[brand] = (brandTotalsCY[brand] || 0) + netCY;
+      brandTotalsLY[brand] = (brandTotalsLY[brand] || 0) + netLY;
+    }
+
+    if (artId != null) {
+      let a = articleAgg[artId];
+      if (!a) {
+        a = {
+          articleId: artId, name: row['Article Name Th'], productGroup: pg, universe, brand,
+          vendor: row['Vendor Name'], mcDesc: row['Mc Desc'],
+          netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0,
+        };
+        articleAgg[artId] = a;
+      }
+      a.netSalesCY += netCY; a.netSalesLY += netLY; a.qtyCY += qtyCY; a.qtyLY += qtyLY;
+    }
+  });
+
+  const byUniverseRows = UNIVERSE_KEYS.map(u => ({
+    universe: u,
+    netSalesCY: byUniverse[u].netSalesCY, netSalesLY: byUniverse[u].netSalesLY,
+    qtyCY: byUniverse[u].qtyCY, qtyLY: byUniverse[u].qtyLY,
+    skuCY: byUniverse[u].skuCy.size,
+  }));
+
+  const toSortedRows = (byMap, totalsCY, totalsLY, labelKey) =>
+    Object.keys(totalsCY)
+      .sort((a, b) => totalsCY[b] - totalsCY[a])
+      .map(key => ({ [labelKey]: key, netSalesByUniverse: byMap[key], total: totalsCY[key], totalLY: totalsLY[key] || 0 }));
+
+  const byProductGroupUniverse = toSortedRows(byPgUniverse, pgTotalsCY, pgTotalsLY, 'productGroup');
+  const byProductGroupMerUniverse = toSortedRows(byPgMerUniverse, pgMerTotalsCY, pgMerTotalsLY, 'productGroup');
+
+  const TOP_N_BRANDS = 5;
+  const byBrandUniverseRows = toSortedRows(byBrandUniverse, brandTotalsCY, brandTotalsLY, 'brand').slice(0, TOP_N_BRANDS);
+
+  const TOP_N_PRODUCTS = 3;
+  function topProductsBy(metricKey) {
+    return UNIVERSES.map(u => {
+      const inUniverse = Object.values(articleAgg).filter(a => a.universe === u);
+      const top = inUniverse.slice().sort((a, b) => b[metricKey] - a[metricKey]).slice(0, TOP_N_PRODUCTS);
+      return { universe: u, products: top };
+    });
+  }
+
+  const skuLyAll = new Set();
+  UNIVERSE_KEYS.forEach(u => byUniverse[u].skuLy.forEach(id => skuLyAll.add(id)));
+
+  return {
+    byUniverse: byUniverseRows,
+    byProductGroupUniverse,
+    byProductGroupMerUniverse,
+    byBrandUniverse: byBrandUniverseRows,
+    topProductsByUniverseNetSales: topProductsBy('netSalesCY'),
+    topProductsByUniverseQty: topProductsBy('qtyCY'),
+    grandTotalNetSalesCY: netCYAll,
+    grandTotalSkuCY: skuCYAll.size,
+    skuLYAll: skuLyAll.size,
+  };
+}
+
+// Parse the calendar date DIRECTLY out of the raw string (regex on the YYYY-MM-DD
+// prefix) instead of constructing a JS Date and reading UTC parts back out of it.
+// Tableau's date values arrive as timezone-naive calendar dates (e.g.
+// "2026-01-01T00:00:00"); handing that to `new Date(...)` makes JS interpret it as
+// LOCAL midnight, and a later `.getUTCMonth()`/`.getUTCFullYear()` read then shifts
+// any date on the 1st of a month into the previous month in every timezone ahead of
+// UTC (verified: this misclassified Jan 1 as December in UTC+7). Regex-parsing the
+// digits avoids the round-trip through any timezone entirely.
+function parseTableauDateParts(value) {
+  if (value == null) return null;
+  const s = (value instanceof Date) ? value.toISOString() : String(value);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  return { year: +m[1], month: +m[2], day: +m[3] }; // month is 1-12
+}
+function partsToISO(p) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
+}
+
+function aggregateTrend(rows) {
+  const totals = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0 };
+  const byMonth = {};      // month label -> {netSalesCY, netSalesLY, qtyCY, qtyLY}
+  const byMonthUniverse = {}; // month label -> segment map
+  const monthTotals = {};
+  const monthSortKey = {};
+  const byFlagUniverse = {}, flagTotalsCY = {};
+  let minKey = null, maxKey = null, minParts = null, maxParts = null;
+
+  rows.forEach(row => {
+    const parts = parseTableauDateParts(row['Day Month']);
+    if (!parts) return;
+    const dateKey = parts.year * 10000 + parts.month * 100 + parts.day;
+    if (minKey === null || dateKey < minKey) { minKey = dateKey; minParts = parts; }
+    if (maxKey === null || dateKey > maxKey) { maxKey = dateKey; maxParts = parts; }
+
+    const universe = row['Universe'] || 'UNCLASSIFIED';
+    const flagPb = row['Flag_PrivateBrand'];
+    const netCY = num(row['Net Inc Tax - CY']);
+    const netLY = num(row['Net Inc Tax - LY']);
+    const qtyCY = num(row['Sales Qty - CY']);
+    const qtyLY = num(row['Sales Qty - LY']);
+
+    totals.netSalesCY += netCY; totals.netSalesLY += netLY;
+    totals.qtyCY += qtyCY; totals.qtyLY += qtyLY;
+
+    if (flagPb) {
+      const seg = addTo(byFlagUniverse, flagPb)[universe] || (addTo(byFlagUniverse, flagPb)[universe] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 });
+      seg.netSalesCY += netCY; seg.netSalesLY += netLY; seg.qtyCY += qtyCY;
+      flagTotalsCY[flagPb] = (flagTotalsCY[flagPb] || 0) + netCY;
+    }
+
+    const monthKey = parts.year * 100 + parts.month;
+    const monthLabel = MONTH_NAMES[parts.month - 1];
+    monthSortKey[monthLabel] = monthKey;
+
+    if (!byMonth[monthLabel]) byMonth[monthLabel] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0 };
+    const bm = byMonth[monthLabel];
+    bm.netSalesCY += netCY; bm.netSalesLY += netLY; bm.qtyCY += qtyCY; bm.qtyLY += qtyLY;
+
+    const mseg = addTo(byMonthUniverse, monthLabel)[universe] || (addTo(byMonthUniverse, monthLabel)[universe] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 });
+    mseg.netSalesCY += netCY; mseg.netSalesLY += netLY; mseg.qtyCY += qtyCY;
+    monthTotals[monthLabel] = (monthTotals[monthLabel] || 0) + netCY;
+  });
+
+  const monthsPresent = Object.keys(byMonth).sort((a, b) => monthSortKey[a] - monthSortKey[b]);
+  const byMonthRows = monthsPresent.map(m => ({ month: m, ...byMonth[m] }));
+  const byMonthUniverseRows = monthsPresent.map(m => ({ month: m, netSalesByUniverse: byMonthUniverse[m], total: monthTotals[m] }));
+
+  const byPrivateBrandUniverse = Object.keys(flagTotalsCY)
+    .sort((a, b) => flagTotalsCY[b] - flagTotalsCY[a])
+    .map(label => ({ label, netSalesByUniverse: byFlagUniverse[label], total: flagTotalsCY[label] }));
+
+  return {
+    kpi: {
+      netSalesCY: totals.netSalesCY, netSalesLY: totals.netSalesLY,
+      qtyCY: totals.qtyCY, qtyLY: totals.qtyLY,
+      aspCY: totals.qtyCY ? totals.netSalesCY / totals.qtyCY : 0,
+      aspLY: totals.qtyLY ? totals.netSalesLY / totals.qtyLY : 0,
+    },
+    byMonth: byMonthRows,
+    byMonthUniverse: byMonthUniverseRows,
+    byPrivateBrandUniverse,
+    periodStart: minParts ? partsToISO(minParts) : null,
+    periodEnd: maxParts ? partsToISO(maxParts) : null,
+  };
+}
+
+function buildDashboardData(detailRows, trendRows) {
+  const d = aggregateDetail(detailRows);
+  const t = aggregateTrend(trendRows);
+  return {
+    kpi: { ...t.kpi, skuCY: d.grandTotalSkuCY, skuLY: d.skuLYAll },
+    byUniverse: d.byUniverse,
+    byProductGroupUniverse: d.byProductGroupUniverse,
+    byProductGroupMerUniverse: d.byProductGroupMerUniverse,
+    byBrandUniverse: d.byBrandUniverse,
+    byPrivateBrandUniverse: t.byPrivateBrandUniverse,
+    byMonth: t.byMonth,
+    byMonthUniverse: t.byMonthUniverse,
+    topProductsByUniverseNetSales: d.topProductsByUniverseNetSales,
+    topProductsByUniverseQty: d.topProductsByUniverseQty,
+    grandTotalNetSalesCY: d.grandTotalNetSalesCY,
+    grandTotalSkuCY: d.grandTotalSkuCY,
+    periodStart: t.periodStart,
+    periodEnd: t.periodEnd,
+  };
+}
+
+/* ============================================================
+   formatting helpers (same convention throughout the dashboard)
+   ============================================================ */
+function fmtCompact(n, digits) {
+  digits = digits === undefined ? 2 : digits;
+  const abs = Math.abs(n);
+  if (abs >= 1e6) return (n/1e6).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }) + 'M';
+  if (abs >= 1e3) return (n/1e3).toFixed(digits) + 'K';
+  return n.toFixed(0);
+}
+function fmtInt(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtMoney(n) { return fmtCompact(n, 2); }
+function fmtM(n) { return (n/1e6).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtPct(n, digits) {
+  digits = digits === undefined ? 1 : digits;
+  return (n*100).toFixed(digits) + '%';
+}
+function fmtPctSigned(n, digits) {
+  digits = digits === undefined ? 2 : digits;
+  const sign = n > 0 ? '+' : '';
+  return sign + (n*100).toFixed(digits) + '%';
+}
+function arrow(g) { return g >= 0 ? '▲' : '▼'; }
+function growthClass(g) { return g >= 0 ? 'good' : 'bad'; }
+function growth(cy, ly) { return ly ? (cy - ly) / ly : 0; }
+
+const UNI_COLOR = { ECO: 'var(--uni-eco)', MASS: 'var(--uni-mass)', PREMIUM: 'var(--uni-premium)', LUXURY: 'var(--uni-luxury)', UNCLASSIFIED: 'var(--baseline)' };
+const UNI_ORDER = [...UNIVERSES, 'UNCLASSIFIED'];
+
+/* ---------------- tooltip ---------------- */
+const tooltipEl = document.getElementById('tooltip');
+function showTooltip(x, y, html) {
+  tooltipEl.innerHTML = html;
+  tooltipEl.style.display = 'block';
+  const pad = 14;
+  const rect = tooltipEl.getBoundingClientRect();
+  let left = x + pad;
+  let top = y + pad;
+  if (left + rect.width > window.innerWidth - 8) left = x - rect.width - pad;
+  if (top + rect.height > window.innerHeight - 8) top = y - rect.height - pad;
+  tooltipEl.style.left = left + 'px';
+  tooltipEl.style.top = top + 'px';
+}
+function hideTooltip() { tooltipEl.style.display = 'none'; }
+
+/* ---------------- KPI tiles ---------------- */
+let PERIOD_YEAR_CY = new Date().getFullYear();
+let PERIOD_YEAR_LY = PERIOD_YEAR_CY - 1;
+
+function renderKpi(id, opts) {
+  const el = document.getElementById(id);
+  const g = growth(opts.cy, opts.ly);
+  el.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi-icon" style="color:var(--series-accent)">${opts.icon}</div>
+      <div class="kpi-text">
+        <div class="kpi-label">${opts.label}</div>
+        <div class="kpi-value">${opts.formatValue(opts.cy)}</div>
+        <div class="kpi-delta ${growthClass(g)}">${arrow(g)} ${fmtPctSigned(g)}</div>
+        <div class="kpi-prior">vs ${PERIOD_YEAR_LY} : ${opts.formatValue(opts.ly)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderKpis(DATA) {
+  const k = DATA.kpi;
+  renderKpi('kpi-netSales', {
+    label: 'Net Sales', cy: k.netSalesCY, ly: k.netSalesLY,
+    formatValue: v => fmtMoney(v),
+    icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18V13M20 18V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  });
+  renderKpi('kpi-qty', {
+    label: 'Sales Qty', cy: k.qtyCY, ly: k.qtyLY,
+    formatValue: v => fmtInt(v),
+    icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 8l-9-5-9 5 9 5 9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  });
+  renderKpi('kpi-sku', {
+    label: 'SKU Count', cy: k.skuCY, ly: k.skuLY,
+    formatValue: v => fmtInt(v),
+    icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M20.5 12.5 12 21l-9-9L11.5 3H20a1 1 0 0 1 1 1v8.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="15.5" cy="7.5" r="1.4" fill="currentColor"/></svg>',
+  });
+  renderKpi('kpi-asp', {
+    label: 'Average Selling Price', cy: k.aspCY, ly: k.aspLY,
+    formatValue: v => fmtInt(v),
+    icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M9.5 15c0 1 1 1.7 2.5 1.7s2.5-.7 2.5-1.6c0-2.2-5-1-5-3.4 0-.9 1-1.6 2.5-1.6s2.3.6 2.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 7.3v9.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  });
+}
+
+/* ---------------- Sales by Universe table ---------------- */
+function renderUniverseTable(DATA) {
+  const el = document.getElementById('table-universe');
+  const rows = DATA.byUniverse;
+  const totalNetSales = rows.reduce((s, r) => s + r.netSalesCY, 0);
+  const totalQty = rows.reduce((s, r) => s + r.qtyCY, 0);
+  const totalSku = rows.reduce((s, r) => s + r.skuCY, 0);
+
+  const body = rows.map(r => {
+    const g = growth(r.netSalesCY, r.netSalesLY);
+    return `<tr>
+      <td><span class="uni-tag"><span class="uni-dot" style="background:${UNI_COLOR[r.universe]}"></span>${r.universe}</span></td>
+      <td class="num">${fmtM(r.netSalesCY)}</td>
+      <td class="num">${fmtPct(totalNetSales ? r.netSalesCY/totalNetSales : 0)}</td>
+      <td class="num growth ${growthClass(g)}">${arrow(g)} ${fmtPct(Math.abs(g),2)}</td>
+      <td class="num">${fmtInt(r.qtyCY)}</td>
+      <td class="num">${fmtPct(totalQty ? r.qtyCY/totalQty : 0)}</td>
+      <td class="num">${fmtInt(r.skuCY)}</td>
+      <td class="num">${fmtPct(totalSku ? r.skuCY/totalSku : 0)}</td>
+    </tr>`;
+  }).join('');
+
+  const totalG = growth(totalNetSales, rows.reduce((s, r) => s + r.netSalesLY, 0));
+  const totalRow = `<tr class="total-row">
+    <td>TOTAL</td>
+    <td class="num">${fmtM(totalNetSales)}</td>
+    <td class="num">100.0%</td>
+    <td class="num growth ${growthClass(totalG)}">${arrow(totalG)} ${fmtPct(Math.abs(totalG),2)}</td>
+    <td class="num">${fmtInt(totalQty)}</td>
+    <td class="num">100.0%</td>
+    <td class="num">${fmtInt(totalSku)}</td>
+    <td class="num">100.0%</td>
+  </tr>`;
+
+  el.innerHTML = `<table class="data-table">
+    <thead><tr>
+      <th>Universe</th><th class="num">Net Sales (M)</th><th class="num">% Share</th><th class="num">Growth vs LY</th>
+      <th class="num">Sales Qty</th><th class="num">% Share</th><th class="num">SKU Count</th><th class="num">% Share of SKU</th>
+    </tr></thead>
+    <tbody>${body}${totalRow}</tbody>
+  </table>`;
+}
+
+/* ---------------- stacked bar chart (shared) ---------------- */
+const EMPTY_SEGMENT = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0 };
+
+function renderStackedBars(containerId, rows, opts) {
+  opts = opts || {};
+  const el = document.getElementById(containerId);
+  const legend = `<div class="legend-row">${UNI_ORDER.map(u => `<span class="li"><span class="sw" style="background:${UNI_COLOR[u]}"></span>${u}</span>`).join('')}</div>`;
+  const rowClass = opts.showGrowth ? 'stackbar-row with-growth' : 'stackbar-row';
+
+  const header = opts.showGrowth ? `<div class="stackbar-row with-growth stackbar-header-row">
+    <div></div><div></div>
+    <div class="col-header">Net Sales</div>
+    <div class="col-header">%Growth</div>
+  </div>` : '';
+
+  const body = rows.map((r, ri) => {
+    const total = r.total;
+    const segs = UNI_ORDER.map(u => {
+      const seg = r.netSalesByUniverse[u] || EMPTY_SEGMENT;
+      const share = total ? seg.netSalesCY / total : 0;
+      if (share <= 0) return '';
+      const pctOfTotal = fmtPct(share, 0);
+      return `<div class="stackbar-seg" data-row="${ri}" data-uni="${u}" style="width:${(share*100).toFixed(2)}%;background:${UNI_COLOR[u]}">${share > 0.08 ? pctOfTotal : ''}</div>`;
+    }).join('');
+    const label = r.productGroup || r.brand;
+    const growthCell = opts.showGrowth ? (() => {
+      const g = growth(r.total, r.totalLY);
+      return `<div class="stackbar-growth ${growthClass(g)}">${arrow(g)} ${fmtPctSigned(g, 2)}</div>`;
+    })() : '';
+    return `<div class="${rowClass}">
+      <div class="rowlabel">${label}</div>
+      <div class="stackbar-track">${segs}</div>
+      <div class="stackbar-total">${fmtM(total)}M</div>
+      ${growthCell}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = legend + header + body;
+
+  el.querySelectorAll('.stackbar-seg').forEach(segEl => {
+    const r = rows[+segEl.dataset.row];
+    const u = segEl.dataset.uni;
+    const label = r.productGroup || r.brand;
+    const seg = r.netSalesByUniverse[u] || EMPTY_SEGMENT;
+    const share = r.total ? seg.netSalesCY / r.total : 0;
+    const g = growth(seg.netSalesCY, seg.netSalesLY);
+    const html = `
+      <div class="tt-title"><span class="tt-dot" style="background:${UNI_COLOR[u]}"></span>${u} — ${label}</div>
+      <div class="tt-row"><span>Net Sales (CY)</span><b>${fmtM(seg.netSalesCY)}M</b></div>
+      <div class="tt-row"><span>Net Sales (LY)</span><b>${fmtM(seg.netSalesLY)}M</b></div>
+      <div class="tt-row"><span>Growth vs LY</span><b class="${growthClass(g)}">${arrow(g)} ${fmtPct(Math.abs(g),1)}</b></div>
+      <div class="tt-row"><span>Share of row</span><b>${fmtPct(share,1)}</b></div>
+    `;
+    segEl.addEventListener('mouseenter', e => showTooltip(e.clientX, e.clientY, html));
+    segEl.addEventListener('mousemove', e => showTooltip(e.clientX, e.clientY, html));
+    segEl.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+function renderProductGroupCard(DATA) {
+  const useGroup = document.getElementById('pgToggle').checked;
+  const dimLabel = useGroup ? 'Product Group' : 'Product Group Mer';
+  const rows = useGroup ? DATA.byProductGroupUniverse : DATA.byProductGroupMerUniverse;
+  document.getElementById('pg-card-title').textContent = `Sales by ${dimLabel} and Universe`;
+  document.getElementById('pg-card-sub').textContent = `%Share Sales within ${dimLabel}`;
+  renderStackedBars('chart-pgUniverse', rows, { showGrowth: true });
+}
+
+function renderCharts(DATA) {
+  renderProductGroupCard(DATA);
+  renderStackedBars('chart-brandUniverse', DATA.byBrandUniverse, { showGrowth: true });
+}
+
+/* ---------------- Universe performance grid (KPI + trend + Flag_PrivateBrand mix, per Universe) ---------------- */
+function sparklinePoints(values, w, h, pad) {
+  pad = pad === undefined ? 3 : pad;
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = (max - min) || 1;
+  const stepX = values.length > 1 ? (w - pad * 2) / (values.length - 1) : 0;
+  return values.map((v, i) => [
+    pad + i * stepX,
+    pad + (h - pad * 2) * (1 - (v - min) / range),
+  ]);
+}
+
+function smoothLinePath(pts) {
+  if (pts.length < 3) return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2 < pts.length ? i + 2 : i + 1];
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+
+function renderUniverseDetailGrid(DATA) {
+  const pgRows = DATA.byPrivateBrandUniverse;
+
+  const W_SPARK = 118, H_SPARK = 40, PAD_SPARK = 3;
+
+  const cols = UNIVERSES.map(u => {
+    const uni = DATA.byUniverse.find(r => r.universe === u);
+    const g = growth(uni.netSalesCY, uni.netSalesLY);
+
+    const seriesCY = DATA.byMonthUniverse.map(m => (m.netSalesByUniverse[u] || EMPTY_SEGMENT).netSalesCY);
+    const pts = sparklinePoints(seriesCY, W_SPARK, H_SPARK, PAD_SPARK);
+    const lineD = smoothLinePath(pts);
+    const baseY = H_SPARK - PAD_SPARK;
+    const areaD = pts.length ? `${lineD} L${pts[pts.length - 1][0].toFixed(1)},${baseY} L${pts[0][0].toFixed(1)},${baseY} Z` : '';
+    const gradId = `spark-grad-${u}`;
+    const hitDots = pts.map((p, i) => `<circle class="univ-spark-pt" data-i="${i}" data-u="${u}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="7" fill="transparent"/>`).join('');
+    const lastPt = pts[pts.length - 1] || [0, 0];
+    const sparkSvg = `<svg class="univ-spark" width="${W_SPARK}" height="${H_SPARK}" viewBox="0 0 ${W_SPARK} ${H_SPARK}" style="overflow:visible">
+      <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${UNI_COLOR[u]}" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="${UNI_COLOR[u]}" stop-opacity="0.02"/>
+      </linearGradient></defs>
+      <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
+      <path d="${lineD}" fill="none" stroke="${UNI_COLOR[u]}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${lastPt[0].toFixed(1)}" cy="${lastPt[1].toFixed(1)}" r="3" fill="${UNI_COLOR[u]}"/>
+      ${hitDots}
+    </svg>`;
+
+    const pgForUniverse = pgRows
+      .map(r => ({ label: r.label, value: (r.netSalesByUniverse[u] || EMPTY_SEGMENT).netSalesCY }))
+      .filter(x => x.value > 0);
+    const uniTotal = pgForUniverse.reduce((s, x) => s + x.value, 0);
+
+    const pgList = pgForUniverse.map(x => {
+      const share = uniTotal ? x.value / uniTotal : 0;
+      return `<div class="univ-pg-row">
+        <div class="univ-pg-label-row"><span class="name">${x.label}</span><span class="val">${fmtM(x.value)}M | ${fmtPct(share, 0)}</span></div>
+        <div class="univ-pg-track"><div class="univ-pg-fill" style="width:${(share * 100).toFixed(2)}%;background:${UNI_COLOR[u]}"></div></div>
+      </div>`;
+    }).join('');
+
+    return `<div class="univ-col">
+      <div class="univ-col-head"><span class="univ-col-dot" style="background:${UNI_COLOR[u]}"></span>${u}</div>
+      <div class="univ-top-row">
+        <div>
+          <div class="univ-kpi-value">${fmtM(uni.netSalesCY)}M</div>
+          <div class="univ-kpi-meta">
+            <span class="univ-kpi-delta ${growthClass(g)}">${arrow(g)} ${fmtPctSigned(g, 2)}</span>
+            <span class="univ-kpi-prior">vs ${PERIOD_YEAR_LY} : ${fmtM(uni.netSalesLY)}M</span>
+          </div>
+        </div>
+        ${sparkSvg}
+      </div>
+      <div class="univ-pg-list">${pgList}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('univ-detail-grid').innerHTML = `<div class="univ-grid">${cols}</div>`;
+
+  document.querySelectorAll('#univ-detail-grid .univ-spark-pt').forEach(dot => {
+    const i = +dot.dataset.i;
+    const u = dot.dataset.u;
+    const m = DATA.byMonthUniverse[i];
+    const seg = m.netSalesByUniverse[u] || EMPTY_SEGMENT;
+    const g = growth(seg.netSalesCY, seg.netSalesLY);
+    const html = `
+      <div class="tt-title"><span class="tt-dot" style="background:${UNI_COLOR[u]}"></span>${u} — ${m.month}</div>
+      <div class="tt-row"><span>Net Sales (CY)</span><b>${fmtM(seg.netSalesCY)}M</b></div>
+      <div class="tt-row"><span>Net Sales (LY)</span><b>${fmtM(seg.netSalesLY)}M</b></div>
+      <div class="tt-row"><span>Growth vs LY</span><b class="${growthClass(g)}">${arrow(g)} ${fmtPct(Math.abs(g), 1)}</b></div>
+    `;
+    dot.addEventListener('mouseenter', e => showTooltip(e.clientX, e.clientY, html));
+    dot.addEventListener('mousemove', e => showTooltip(e.clientX, e.clientY, html));
+    dot.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+/* ---------------- Top products table (top 3 per Universe, Net Sales / Sales Qty toggle) ---------------- */
+function renderTopProducts(DATA) {
+  const el = document.getElementById('table-topProducts');
+  const useQty = document.getElementById('topProductsToggle').checked;
+  const metricLabel = useQty ? 'Sales Qty' : 'Net Sales';
+  const groups = useQty ? DATA.topProductsByUniverseQty : DATA.topProductsByUniverseNetSales;
+  document.getElementById('top-products-sub').textContent =
+    `Top 3 per Universe (UNCLASSIFIED excluded), ranked by ${metricLabel}`;
+
+  const rows = groups.flatMap(grp => grp.products.map((p, i) => {
+    const gNet = growth(p.netSalesCY, p.netSalesLY);
+    const gQty = growth(p.qtyCY, p.qtyLY);
+    const articleId = Math.round(p.articleId);
+    const imgUrl = `https://productimage.boonthavorn.com/o2/${articleId}/`;
+    return `<tr class="row-${grp.universe.toLowerCase()}">
+      <td><span class="uni-tag"><span class="uni-dot" style="background:${UNI_COLOR[grp.universe]}"></span>${grp.universe}</span></td>
+      <td class="num rank">${i + 1}</td>
+      <td class="num">${articleId}</td>
+      <td><img class="prod-thumb" src="${imgUrl}" alt="${articleId}" loading="lazy" onerror="this.style.visibility='hidden'"></td>
+      <td class="name">${p.name || '-'}</td>
+      <td>${p.brand || '-'}</td>
+      <td>${p.productGroup || '-'}</td>
+      <td>${p.mcDesc || '-'}</td>
+      <td class="num">${fmtM(p.netSalesLY)}</td>
+      <td class="num">${fmtM(p.netSalesCY)}</td>
+      <td class="num growth ${growthClass(gNet)}">${arrow(gNet)} ${fmtPctSigned(gNet, 1)}</td>
+      <td class="num">${fmtInt(p.qtyLY)}</td>
+      <td class="num">${fmtInt(p.qtyCY)}</td>
+      <td class="num growth ${growthClass(gQty)}">${arrow(gQty)} ${fmtPctSigned(gQty, 1)}</td>
+    </tr>`;
+  }));
+
+  el.innerHTML = `<table class="data-table">
+    <thead><tr>
+      <th>Universe</th><th class="num">#</th><th class="num">Article ID</th><th>Image</th>
+      <th class="left">Article Name</th><th class="left">Brand</th><th class="left">Product Group</th><th class="left">Mc Desc</th>
+      <th class="num">Net Sales LY (M)</th><th class="num">Net Sales CY (M)</th><th class="num">Growth Net Sales</th>
+      <th class="num">Sales Qty LY</th><th class="num">Sales Qty CY</th><th class="num">Growth Sales Qty</th>
+    </tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+
+/* ---------------- Sales by Universe donut ---------------- */
+function renderUniverseDonut(containerId, allRows) {
+  const el = document.getElementById(containerId);
+  const rows = UNIVERSES.map(u => allRows.find(r => r.universe === u)).filter(Boolean);
+  const total = rows.reduce((s, r) => s + r.netSalesCY, 0);
+  if (!total) { el.innerHTML = '<p class="sub">No data.</p>'; return; }
+
+  const W = 1000, H = 420, CX = W / 2, CY = H / 2 + 4;
+  const R = 120, THICK = 24;
+  const CIRC = 2 * Math.PI * R;
+
+  let cum = 0;
+  const slices = rows.map(r => {
+    const share = r.netSalesCY / total;
+    const startFrac = cum;
+    cum += share;
+    return { r, share, startFrac };
+  });
+
+  const legend = `<div class="legend-row">${rows.map(r => `<span class="li"><span class="sw" style="background:${UNI_COLOR[r.universe]}"></span>${r.universe}</span>`).join('')}</div>`;
+
+  const rings = slices.map((s, i) => {
+    const len = s.share * CIRC;
+    const offset = -(s.startFrac * CIRC);
+    return `<circle class="donut-seg" data-i="${i}" cx="${CX}" cy="${CY}" r="${R}" fill="none"
+      stroke="${UNI_COLOR[s.r.universe]}" stroke-width="${THICK}"
+      stroke-dasharray="${len.toFixed(2)} ${(CIRC - len).toFixed(2)}"
+      stroke-dashoffset="${offset.toFixed(2)}"
+      transform="rotate(-90 ${CX} ${CY})"/>`;
+  }).join('');
+
+  const labelR1 = R + 10;
+  const labelR2 = R + 44;
+  const horiz = 34;
+
+  const labels = slices.map(s => {
+    const mid = (s.startFrac + s.share / 2) * 2 * Math.PI - Math.PI / 2;
+    const cosA = Math.cos(mid), sinA = Math.sin(mid);
+    const p1x = CX + labelR1 * cosA, p1y = CY + labelR1 * sinA;
+    const p2x = CX + labelR2 * cosA, p2y = CY + labelR2 * sinA;
+    const goRight = cosA >= 0;
+    const p3x = p2x + (goRight ? horiz : -horiz);
+    const p3y = p2y;
+    const anchor = goRight ? 'start' : 'end';
+    const textX = p3x + (goRight ? 6 : -6);
+    const g = growth(s.r.netSalesCY, s.r.netSalesLY);
+    return `
+      <path d="M${p1x.toFixed(1)},${p1y.toFixed(1)} L${p2x.toFixed(1)},${p2y.toFixed(1)} L${p3x.toFixed(1)},${p3y.toFixed(1)}"
+        fill="none" stroke="var(--text-muted)" stroke-width="1"/>
+      <circle cx="${p2x.toFixed(1)}" cy="${p2y.toFixed(1)}" r="4" fill="${UNI_COLOR[s.r.universe]}"/>
+      <text x="${textX.toFixed(1)}" y="${(p3y + 3).toFixed(1)}" text-anchor="${anchor}" font-size="25" font-weight="700" fill="var(--text-primary)">${s.r.universe} - ${fmtPct(s.share, 2)}</text>
+      <text x="${textX.toFixed(1)}" y="${(p3y + 31).toFixed(1)}" text-anchor="${anchor}" font-size="22" fill="var(--text-muted)">${fmtM(s.r.netSalesCY)}M (<tspan fill="${growthClass(g) === 'good' ? 'var(--good)' : 'var(--critical)'}" font-weight="700">${arrow(g)} ${fmtPctSigned(g, 2)}</tspan>)</text>
+    `;
+  }).join('');
+
+  el.innerHTML = `
+    ${legend}
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;overflow:visible">
+      ${rings}
+      ${labels}
+      <text x="${CX}" y="${CY - 12}" text-anchor="middle" font-size="32" font-weight="700" fill="var(--text-primary)">${fmtM(total)}M</text>
+      <text x="${CX}" y="${CY + 26}" text-anchor="middle" font-size="22" fill="var(--text-muted)">Total Net Sales</text>
+    </svg>
+  `;
+
+  el.querySelectorAll('.donut-seg').forEach(segEl => {
+    const s = slices[+segEl.dataset.i];
+    const g = growth(s.r.netSalesCY, s.r.netSalesLY);
+    const html = `
+      <div class="tt-title"><span class="tt-dot" style="background:${UNI_COLOR[s.r.universe]}"></span>${s.r.universe}</div>
+      <div class="tt-row"><span>Net Sales (CY)</span><b>${fmtM(s.r.netSalesCY)}M</b></div>
+      <div class="tt-row"><span>Net Sales (LY)</span><b>${fmtM(s.r.netSalesLY)}M</b></div>
+      <div class="tt-row"><span>Growth vs LY</span><b class="${growthClass(g)}">${arrow(g)} ${fmtPct(Math.abs(g), 2)}</b></div>
+      <div class="tt-row"><span>Share (of 4 known tiers)</span><b>${fmtPct(s.share, 2)}</b></div>
+    `;
+    segEl.addEventListener('mouseenter', e => showTooltip(e.clientX, e.clientY, html));
+    segEl.addEventListener('mousemove', e => showTooltip(e.clientX, e.clientY, html));
+    segEl.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+/* ============================================================
+   Full render pipeline — identical structure to the validated
+   preview build, just driven by live DATA instead of a baked-in
+   JSON blob.
+   ============================================================ */
+let CURRENT_DATA = null;
+
+function renderDashboard(DATA) {
+  CURRENT_DATA = DATA;
+  if (DATA.periodEnd) {
+    const [y, m, d] = DATA.periodEnd.split('-');
+    PERIOD_YEAR_CY = +y;
+    PERIOD_YEAR_LY = PERIOD_YEAR_CY - 1;
+    document.getElementById('asof').textContent = `Data as of : ${d}/${m}/${y}`;
+  }
+  if (DATA.periodStart && DATA.periodEnd) {
+    const fmtShortDate = iso => {
+      const [y, m] = iso.split('-');
+      return MONTH_NAMES[+m - 1].slice(0, 3) + ' ' + y;
+    };
+    document.getElementById('subtitle').textContent =
+      `Sales Performance | ${fmtShortDate(DATA.periodStart)}–${fmtShortDate(DATA.periodEnd)} vs ${PERIOD_YEAR_LY}`;
+  }
+  renderKpis(DATA);
+  renderUniverseDonut('chart-universeDonut', DATA.byUniverse);
+  renderUniverseTable(DATA);
+  renderCharts(DATA);
+  renderUniverseDetailGrid(DATA);
+  renderTopProducts(DATA);
+}
+
+function rerender() {
+  if (CURRENT_DATA) renderDashboard(CURRENT_DATA);
+}
+document.getElementById('pgToggle').addEventListener('change', rerender);
+document.getElementById('topProductsToggle').addEventListener('change', rerender);
+
+/* ============================================================
+   Tableau bootstrap
+   ============================================================ */
+let detailWorksheet = null;
+let trendWorksheet = null;
+let refreshQueued = false;
+
+function refreshData() {
+  if (refreshQueued) return;
+  refreshQueued = true;
+  setStatus('Refreshing…');
+  Promise.all([
+    readWorksheetRows(detailWorksheet),
+    readWorksheetRows(trendWorksheet),
+  ]).then(([detail, trend]) => {
+    refreshQueued = false;
+    const missingDetail = findMissingFields(detail.fieldNames, DETAIL_FIELDS);
+    if (missingDetail.length) { setError(detailWorksheet.name, missingDetail); return; }
+    const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
+    if (missingTrend.length) { setError(trendWorksheet.name, missingTrend); return; }
+
+    clearError();
+    setStatus('');
+    const DATA = buildDashboardData(detail.rows, trend.rows);
+    renderDashboard(DATA);
+  }).catch(err => {
+    refreshQueued = false;
+    setStatus('');
+    document.getElementById('errorBanner').textContent = 'Failed to load data from Tableau: ' + (err && err.message ? err.message : err);
+    document.getElementById('errorBanner').style.display = 'block';
+  });
+}
+
+function debounce(fn, ms) {
+  let t = null;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+const debouncedRefresh = debounce(refreshData, 300);
+
+tableau.extensions.initializeAsync().then(() => {
+  const dashboard = tableau.extensions.dashboardContent.dashboard;
+  const worksheets = dashboard.worksheets;
+
+  const columnChecks = worksheets.map(ws =>
+    ws.getSummaryColumnsInfoAsync().then(cols => ({ ws, fieldNames: cols.map(c => c.fieldName) }))
+  );
+
+  return Promise.all(columnChecks).then(results => {
+    const detail = results.find(r => r.fieldNames.includes(DETAIL_KEY_FIELD));
+    const trend = results.find(r => r.fieldNames.includes(TREND_KEY_FIELD) && !r.fieldNames.includes(DETAIL_KEY_FIELD));
+
+    if (!detail || !trend) {
+      setStatus('');
+      document.getElementById('errorBanner').innerHTML =
+        `Extension needs two worksheets on this dashboard: one with a "${DETAIL_KEY_FIELD}" field (Detail) ` +
+        `and one with a "${TREND_KEY_FIELD}" field but no "${DETAIL_KEY_FIELD}" (Trend). ` +
+        `Found worksheets: ${worksheets.map(w => w.name).join(', ') || '(none)'}.`;
+      document.getElementById('errorBanner').style.display = 'block';
+      return;
+    }
+
+    detailWorksheet = detail.ws;
+    trendWorksheet = trend.ws;
+
+    detailWorksheet.addEventListener(tableau.TableauEventType.FilterChanged, debouncedRefresh);
+    detailWorksheet.addEventListener(tableau.TableauEventType.SummaryDataChanged, debouncedRefresh);
+    trendWorksheet.addEventListener(tableau.TableauEventType.FilterChanged, debouncedRefresh);
+    trendWorksheet.addEventListener(tableau.TableauEventType.SummaryDataChanged, debouncedRefresh);
+
+    refreshData();
+  });
+}).catch(err => {
+  setStatus('');
+  document.getElementById('errorBanner').textContent = 'Failed to initialize Tableau Extensions API: ' + (err && err.message ? err.message : err);
+  document.getElementById('errorBanner').style.display = 'block';
+});
+
+</script>
+</body>
+</html>
