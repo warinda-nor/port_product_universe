@@ -362,7 +362,7 @@
 
 <div id="tooltip" class="tooltip"></div>
 
-<script src="tableau.extensions.1.latest.js"></script>
+<script src="../tableau.extensions.1.latest.js"></script>
 <script>
 
 /* ============================================================
@@ -1192,6 +1192,18 @@ function debounce(fn, ms) {
 }
 const debouncedRefresh = debounce(refreshData, 300);
 
+// No mock data here by design — this file only renders live Tableau data.
+// Outside an iframe (e.g. opened directly in a browser tab), there's no
+// Tableau host to load from, so just show a status message and leave the
+// cards empty rather than calling initializeAsync() (which would hang
+// forever waiting for a host that will never respond).
+if (typeof tableau === 'undefined' || window.self === window.top) {
+  setStatus('This extension only renders inside a Tableau dashboard.');
+} else {
+  initializeExtension();
+}
+
+function initializeExtension() {
 tableau.extensions.initializeAsync().then(() => {
   const dashboard = tableau.extensions.dashboardContent.dashboard;
   const worksheets = dashboard.worksheets;
@@ -1229,6 +1241,7 @@ tableau.extensions.initializeAsync().then(() => {
   document.getElementById('errorBanner').textContent = 'Failed to initialize Tableau Extensions API: ' + (err && err.message ? err.message : err);
   document.getElementById('errorBanner').style.display = 'block';
 });
+}
 
 </script>
 </body>
