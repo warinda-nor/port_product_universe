@@ -133,7 +133,7 @@
     display: flex;
     flex-direction: column;
   }
-  .row-4060 { display: grid; grid-template-columns: 40% 60%; gap: 16px; }
+  .row-4060 { display: grid; grid-template-columns: 2fr 3fr; gap: 16px; }
   @media (max-width: 900px) { .row-4060 { grid-template-columns: 1fr; } }
   .row-universe-h { min-height: 300px; }
   #chart-universeDonut { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; }
@@ -169,7 +169,7 @@
   .univ-pg-list { display: flex; flex-direction: column; gap: 9px; }
   .univ-pg-label-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--text-secondary); margin-bottom: 3px; }
   .univ-pg-label-row .name { font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .univ-pg-label-row .val { flex: none; color: var(--text-muted); }
+  .univ-pg-label-row .val { flex: none; color: var(--text-primary); }
   .univ-pg-track { height: 11px; border-radius: 5px; background: var(--grid); overflow: hidden; }
   .univ-pg-fill { height: 100%; border-radius: 5px; }
 
@@ -206,12 +206,14 @@
   table.data-table tr:hover td { background: rgba(42,120,214,0.06); }
   table.data-table tr.total-row td { font-weight: 700; color: var(--text-primary); border-top: 2px solid var(--grid); }
   table.data-table td.rank { color: var(--text-muted); width: 26px; }
-  table.data-table td.name { color: var(--text-primary); font-weight: 600; max-width: 280px; }
+  table.data-table td.name { color: var(--text-primary); font-weight: 400; max-width: 280px; }
   .uni-tag { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; }
   .uni-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
   .growth.good { color: var(--good); font-weight: 700; }
   .growth.bad { color: var(--critical); font-weight: 700; }
 
+  #chart-pgUniverse, #chart-brandUniverse { flex: 1; display: flex; flex-direction: column; }
+  .stackbar-rows { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
   .stackbar-row { display: grid; grid-template-columns: 130px 1fr 80px; align-items: center; gap: 10px; padding: 8px 0; }
   .stackbar-row.with-growth { grid-template-columns: 130px 1fr 80px 80px; }
   .stackbar-header-row { padding-bottom: 4px; border-bottom: 1px solid var(--grid); }
@@ -222,7 +224,7 @@
   .stackbar-row .rowlabel { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
   #chart-brandUniverse .rowlabel { font-weight: 400; }
   .stackbar-track { display: flex; height: 26px; border-radius: 5px; overflow: hidden; background: var(--grid); }
-  .stackbar-seg { display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: #0b0b0b; font-weight: 700; white-space: nowrap; overflow: hidden; cursor: crosshair; }
+  .stackbar-seg { display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: #0b0b0b; font-weight: 400; white-space: nowrap; overflow: hidden; cursor: crosshair; }
   .stackbar-seg:hover { filter: brightness(1.12); }
   .stackbar-total { text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
   .legend-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; font-size: 12px; color: var(--text-muted); }
@@ -302,7 +304,7 @@
     <div class="col-12 row-4060">
       <div class="card row-universe-h">
         <h3>Sales by Universe</h3>
-        <p class="sub">Share of Net Sales by Universe (excluded UNCLASSIFIED)</p>
+        <p class="sub">Share of Net Sales by Universe</p>
         <div id="chart-universeDonut"></div>
       </div>
       <div class="card row-universe-h">
@@ -336,7 +338,7 @@
 
     <div class="card col-12">
       <h3>Universe Performance</h3>
-      <p class="sub">Net Sales trend and %Share Sales within Flag_PrivateBrand, by Universe (UNCLASSIFIED excluded)</p>
+      <p class="sub">Net Sales trend and %Share Sales within Flag_PrivateBrand, by Universe</p>
       <div id="univ-detail-grid"></div>
     </div>
 
@@ -344,7 +346,7 @@
       <div class="card-head-row">
         <div>
           <h3>Top Products by Universe</h3>
-          <p class="sub" id="top-products-sub">Top 3 per Universe (UNCLASSIFIED excluded), ranked by Net Sales</p>
+          <p class="sub" id="top-products-sub">Top 3 per Universe, ranked by Net Sales</p>
         </div>
         <label class="toggle-wrap">
           <span class="toggle-label">Sales Qty</span>
@@ -834,7 +836,9 @@ function renderStackedBars(containerId, rows, opts) {
       const share = total ? seg.netSalesCY / total : 0;
       if (share <= 0) return '';
       const pctOfTotal = fmtPct(share, 0);
-      return `<div class="stackbar-seg" data-row="${ri}" data-uni="${u}" style="width:${(share*100).toFixed(2)}%;background:${UNI_COLOR[u]}">${share > 0.08 ? pctOfTotal : ''}</div>`;
+      const segLabel = `${Math.round(seg.netSalesCY / 1e6)}M (${pctOfTotal})`;
+      const segText = share > 0.15 ? segLabel : (share > 0.08 ? pctOfTotal : '');
+      return `<div class="stackbar-seg" data-row="${ri}" data-uni="${u}" style="width:${(share*100).toFixed(2)}%;background:${UNI_COLOR[u]}">${segText}</div>`;
     }).join('');
     const label = r.productGroup || r.brand;
     const growthCell = opts.showGrowth ? (() => {
@@ -849,7 +853,7 @@ function renderStackedBars(containerId, rows, opts) {
     </div>`;
   }).join('');
 
-  el.innerHTML = legend + header + body;
+  el.innerHTML = legend + header + `<div class="stackbar-rows">${body}</div>`;
 
   el.querySelectorAll('.stackbar-seg').forEach(segEl => {
     const r = rows[+segEl.dataset.row];
@@ -999,7 +1003,7 @@ function renderTopProducts(DATA) {
   const metricLabel = useQty ? 'Sales Qty' : 'Net Sales';
   const groups = useQty ? DATA.topProductsByUniverseQty : DATA.topProductsByUniverseNetSales;
   document.getElementById('top-products-sub').textContent =
-    `Top 3 per Universe (UNCLASSIFIED excluded), ranked by ${metricLabel}`;
+    `Top 3 per Universe, ranked by ${metricLabel}`;
 
   const rows = groups.flatMap(grp => grp.products.map((p, i) => {
     const gNet = growth(p.netSalesCY, p.netSalesLY);
@@ -1069,15 +1073,31 @@ function renderUniverseDonut(containerId, allRows) {
   const labelR1 = R + 10;
   const labelR2 = R + 44;
   const horiz = 34;
+  const MIN_LABEL_GAP = 58; // block height of the 2-line label (title + net-sales line)
 
-  const labels = slices.map(s => {
+  const labelPts = slices.map(s => {
     const mid = (s.startFrac + s.share / 2) * 2 * Math.PI - Math.PI / 2;
     const cosA = Math.cos(mid), sinA = Math.sin(mid);
     const p1x = CX + labelR1 * cosA, p1y = CY + labelR1 * sinA;
     const p2x = CX + labelR2 * cosA, p2y = CY + labelR2 * sinA;
     const goRight = cosA >= 0;
     const p3x = p2x + (goRight ? horiz : -horiz);
-    const p3y = p2y;
+    return { s, p1x, p1y, p2x, p2y, p3x, p3y: p2y, goRight };
+  });
+
+  // Declutter: on each side (left/right), push overlapping label blocks apart
+  // vertically — needed once slices get small (e.g. a thin wedge sitting
+  // right next to another slice produces near-identical mid-angles).
+  [true, false].forEach(side => {
+    const group = labelPts.filter(p => p.goRight === side).sort((a, b) => a.p3y - b.p3y);
+    for (let i = 1; i < group.length; i++) {
+      const minY = group[i - 1].p3y + MIN_LABEL_GAP;
+      if (group[i].p3y < minY) group[i].p3y = minY;
+    }
+  });
+
+  const labels = labelPts.map(p => {
+    const { s, p1x, p1y, p2x, p2y, p3x, p3y, goRight } = p;
     const anchor = goRight ? 'start' : 'end';
     const textX = p3x + (goRight ? 6 : -6);
     const g = growth(s.r.netSalesCY, s.r.netSalesLY);
