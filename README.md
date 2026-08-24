@@ -56,7 +56,7 @@ tableau.extensions.1.latest.js   Tableau Extensions API (index.html เรีย
 
 ### Calculated Field ที่ต้องสร้างใน Tableau (CY/LY คำนวณสำเร็จรูปมาให้ extension เลย)
 
-Net Inc Tax และ Sales Qty ทุกตัวต้อง split เป็นคอลัมน์ CY (Current Year) กับ LY (ปีก่อน ช่วงเดียวกัน) แยกกัน โดยขับด้วย Parameter `Start Date` / `End Date` บน Dashboard แล้ว extension จะ sum แต่ละคอลัมน์ตรงๆ ไม่มีการคำนวณช่วงวันที่เองอีกต่อไป (ช่วงวันที่/ปีที่แสดงบนหน้าจอ extension เอง **อนุมานจาก min/max ของ `Day Month` ที่พบจริงใน worksheet Trend** ไม่ได้อ่านจาก Parameter ตรงๆ ผ่าน Parameters API — ต่างจาก `port_vendor_fitting` ที่อ่าน Parameter ตรง ดูหัวข้อ "ข้อจำกัด" ด้านล่าง):
+Net Inc Tax และ Sales Qty ทุกตัวต้อง split เป็นคอลัมน์ CY (Current Year) กับ LY (ปีก่อน ช่วงเดียวกัน) แยกกัน โดยขับด้วย Parameter `Start Date` / `End Date` บน Dashboard แล้ว extension จะ sum แต่ละคอลัมน์ตรงๆ ไม่มีการคำนวณช่วงวันที่เองอีกต่อไป — **ช่วงวันที่/ปีที่แสดงบนหน้าจอ extension อ่านตรงจาก Parameter `Start Date`/`End Date` ผ่าน Parameters API** (`dashboard.getParametersAsync()`), เปลี่ยน Parameter แล้ว extension จะ refresh label ให้เองอัตโนมัติ:
 
 | Field ที่ต้องสร้าง | แนวคิดสูตร (ตัวอย่าง) |
 |---|---|
@@ -64,7 +64,7 @@ Net Inc Tax และ Sales Qty ทุกตัวต้อง split เป็�
 | `Net Inc Tax - LY` | เหมือนกันแต่ใช้ `DATEADD('year', -1, [Start Date])` / `DATEADD('year', -1, [End Date])` |
 | `Sales Qty - CY` / `Sales Qty - LY` | สูตรแบบเดียวกัน ใช้ `[Sales Qty]` |
 
-**`Day Month`** — calculated field ใหม่ ใส่ใน worksheet "Trend" เท่านั้น เป็นวันที่รูปแบบ `YYYY-MM-DD` (หรือ date type ปกติ) ใช้เป็นแกนเวลาของกราฟ Trend (extension จะ group ให้เป็นรายเดือนเองจากวันที่) — worksheet "Detail" **ไม่ต้องมี field วันที่เลย**
+**`Day Month`** — calculated field ใหม่ ใส่ใน worksheet "Trend" เท่านั้น เป็น **text field รูปแบบ `D-MonthName`** เช่น `1-April` (**ห้ามมีปีอยู่ในค่านี้** — ยืนยันจากการทดสอบกับ Tableau จริงว่าฟิลด์นี้ไม่มีปี extension จึงใช้ field นี้แค่จัดกลุ่มเป็นรายเดือนเท่านั้น ไม่ได้ใช้หาปี/ช่วงวันที่ — ปี/ช่วงวันที่มาจาก Parameter ด้านบนแทน) ใช้เป็นแกนเวลาของกราฟ Trend — worksheet "Detail" **ไม่ต้องมี field วันที่เลย**
 
 ### สเปก field ที่แต่ละ Worksheet ต้องมี
 
@@ -88,7 +88,7 @@ Net Inc Tax และ Sales Qty ทุกตัวต้อง split เป็�
 
 | Field ใน Tableau | ใช้ทำอะไร |
 |---|---|
-| `Day Month` | แกนเวลาของกราฟ Trend / ใช้อนุมานช่วงวันที่ที่แสดงบนหน้าจอ / ใช้แยกว่านี่คือ worksheet Trend |
+| `Day Month` | แกนเวลาของกราฟ Trend (จัดกลุ่มรายเดือนจากชื่อเดือนใน string เท่านั้น ไม่มีปี) / ใช้แยกว่านี่คือ worksheet Trend |
 | `Sls Ofc Desc` | Sales Office |
 | `Flag_PrivateBrand` | Universe Performance mix (Market Brand / Private Brand) |
 | `Universe` | ใช้กรอง/สรุปยอดตาม Universe รายเดือน |
@@ -101,7 +101,9 @@ Net Inc Tax และ Sales Qty ทุกตัวต้อง split เป็�
 
 ## ข้อจำกัดที่ควรรู้
 
-- ช่วงวันที่/ปีที่แสดงบนหน้าจอ (CY/LY) **อนุมานจาก min/max ของ `Day Month` ที่พบจริงใน worksheet Trend** ไม่ได้อ่านจาก Tableau Parameter ผ่าน Parameters API ตรงๆ — ถ้าต้องการให้ label ตรงกับ Parameter `Start Date`/`End Date` แบบ `port_vendor_fitting` ต้องปรับโค้ดเพิ่ม (ยังไม่ทำในรอบนี้ตามที่ตกลงไว้)
+- ต้องมี Parameter ชื่อตรงตัว **`Start Date`** และ **`End Date`** (type: Date) อยู่บน Dashboard จริง — extension อ่านค่าทั้งสองตัวนี้ตรงๆผ่าน Parameters API เพื่อเอามาโชว์เป็น period/ปี label ที่หัวหน้าจอ ถ้าไม่พบ Parameter ชื่อนี้ label จะไม่อัปเดต (ไม่ error แต่จะค้างที่ค่า default)
+- `Day Month` ต้องเป็น text field รูปแบบ `D-MonthName` (เช่น `1-April`) — ถ้า field นี้ parse ไม่ผ่านสักแถวเลย extension จะโชว์ error banner บอกตัวอย่างค่าจริงที่ได้รับมา ไม่ใช่ปล่อยให้ทุกยอดใน KPI/กราฟ Trend กลายเป็น 0 เงียบๆ
+- field ที่เป็นตัวเลข (measure) ถ้าถูกลากขึ้น shelf แบบ aggregate จะได้ fieldName กลับมาเป็น `AGG(ชื่อ field)` ไม่ใช่ชื่อ field เพียวๆ — extension ตัดคำห่อนี้ให้อัตโนมัติแล้ว (`normalizeFieldName`) ไม่ต้องแก้อะไรฝั่ง Tableau
 - แถวที่ `Universe` เป็นค่าว่าง/ไม่ใช่ 4 tier มาตรฐาน จะถูกจัดเป็น `UNCLASSIFIED` และโชว์แบบลดความเด่นในตาราง/stacked bar เท่านั้น — โดนัทชาร์ตกับกริด "Universe Performance" ไม่รวม UNCLASSIFIED
 - ทุกครั้งที่แก้ `universe-overview/index.html` แล้ว push ขึ้น GitHub ต้องรอ GitHub Pages build ใหม่ (ปกติ 1–2 นาที) ก่อนที่ Tableau จะเห็นเวอร์ชันล่าสุด — ถ้าไม่เห็นการเปลี่ยนแปลง ให้ลอง hard refresh หรือปิด-เปิด dashboard ใหม่
-- ยังไม่ได้ทดสอบกับ Tableau Desktop จริง (`getSummaryDataReaderAsync`, การแยก Detail/Trend อัตโนมัติ, event listener refresh) — ตรวจสอบตอนติดตั้งจริงตามข้อ 3
+- อ่าน Detail กับ Trend **ทีละ worksheet** (ไม่อ่านพร้อมกัน) เพราะเปิด `DataTableReader` สอง session ซ้อนกันเจอ `internal-error` ใน Tableau บางเวอร์ชัน
