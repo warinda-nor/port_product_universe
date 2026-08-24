@@ -85,7 +85,7 @@
     font-size: 15px;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1500px; margin: 0 auto; padding: 0 0 32px; }
+  .wrap { max-width: 1600px; margin: 0 auto; padding: 0 0 32px; }
 
   .banner { display: none; border-bottom: 1px solid var(--border); font-size: 12.5px; padding: 8px 24px; text-align: center; }
   .banner.status { display: block; background: var(--uni-mass-wash); color: var(--text-secondary); }
@@ -94,7 +94,7 @@
   header.topbar {
     background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
     color: #fff;
-    padding: 16px 24px;
+    padding: 20px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -106,7 +106,7 @@
   }
   .brand { display: flex; align-items: center; gap: 14px; }
   .brand .mark {
-    width: 42px; height: 42px; border-radius: 10px;
+    width: 46px; height: 46px; border-radius: 10px;
     background: rgba(255,255,255,0.12);
     display: flex; align-items: center; justify-content: center;
     flex: none;
@@ -1198,6 +1198,7 @@ document.getElementById('topProductsToggle').addEventListener('change', rerender
    ============================================================ */
 let detailWorksheet = null;
 let trendWorksheet = null;
+let dashboardRef = null;
 let refreshQueued = false;
 
 // "Day Month" (Trend) has no year, so the header's period/year comes from
@@ -1220,6 +1221,13 @@ function refreshData() {
   if (refreshQueued) return;
   refreshQueued = true;
   setStatus('Refreshing…');
+  // Re-read Start Date/End Date on every refresh, not just at startup — otherwise
+  // the header subtitle and "Data as of" footer keep showing whatever period was
+  // current when the extension initialized, even after the user changes the
+  // Parameter (the KPI numbers still update correctly since those come from the
+  // CY/LY calculated fields, which are computed inside Tableau off the same
+  // Parameters independently of this extension).
+  readPeriodParameters(dashboardRef).then(() =>
   // Read one worksheet at a time — running two DataTableReader sessions
   // concurrently (Promise.all) is a known rough edge in some Tableau builds
   // and can surface as a generic "internal-error" from getSummaryDataReaderAsync.
@@ -1262,7 +1270,8 @@ function refreshData() {
       setStatus('');
       document.getElementById('errorBanner').textContent = 'Failed to load data from Tableau: ' + (err && err.message ? err.message : err);
       document.getElementById('errorBanner').style.display = 'block';
-    });
+    })
+  );
 }
 
 function debounce(fn, ms) {
@@ -1285,6 +1294,7 @@ if (typeof tableau === 'undefined' || window.self === window.top) {
 function initializeExtension() {
 tableau.extensions.initializeAsync().then(() => {
   const dashboard = tableau.extensions.dashboardContent.dashboard;
+  dashboardRef = dashboard;
   const worksheets = dashboard.worksheets;
 
   const columnChecks = worksheets.map(ws =>
