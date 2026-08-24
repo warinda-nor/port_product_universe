@@ -417,6 +417,18 @@ function clearError() {
    (getSummaryDataAsync alone truncates on worksheets with more
    than ~10k marks; both Detail and Trend routinely exceed that).
    ============================================================ */
+// Measures placed on a shelf as an aggregation come back from the
+// Extensions API wrapped as "AGG(Field Name)" / "SUM(Field Name)" etc.,
+// not the bare field name — strip the wrapper so DETAIL_FIELDS/TREND_FIELDS
+// and every downstream row[...] lookup can keep using plain field names.
+const AGG_WRAPPERS = ['AGG', 'SUM', 'AVG', 'MIN', 'MAX', 'CNT', 'CNTD', 'MEDIAN', 'ATTR', 'STDEV', 'STDEVP', 'VAR', 'VARP'];
+function normalizeFieldName(name) {
+  for (const fn of AGG_WRAPPERS) {
+    const prefix = fn + '(';
+    if (name.startsWith(prefix) && name.endsWith(')')) return name.slice(prefix.length, -1);
+  }
+  return name;
+}
 function readWorksheetRows(worksheet) {
   return worksheet.getSummaryDataReaderAsync(undefined, { ignoreSelection: true }).then(reader => {
     const pageCount = reader.pageCount;
@@ -434,10 +446,10 @@ function readWorksheetRows(worksheet) {
     return chain.then(() => reader.releaseAsync()).then(() => {
       const rows = allData.map(dataRow => {
         const obj = {};
-        columns.forEach((c, i) => { obj[c.fieldName] = dataRow[i].value; });
+        columns.forEach((c, i) => { obj[normalizeFieldName(c.fieldName)] = dataRow[i].value; });
         return obj;
       });
-      return { rows, fieldNames: columns.map(c => c.fieldName) };
+      return { rows, fieldNames: columns.map(c => normalizeFieldName(c.fieldName)) };
     });
   });
 }
