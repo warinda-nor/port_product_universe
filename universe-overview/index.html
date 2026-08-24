@@ -1185,26 +1185,31 @@ function refreshData() {
   if (refreshQueued) return;
   refreshQueued = true;
   setStatus('Refreshing…');
-  Promise.all([
-    readWorksheetRows(detailWorksheet),
-    readWorksheetRows(trendWorksheet),
-  ]).then(([detail, trend]) => {
-    refreshQueued = false;
-    const missingDetail = findMissingFields(detail.fieldNames, DETAIL_FIELDS);
-    if (missingDetail.length) { setError(detailWorksheet.name, missingDetail); return; }
-    const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
-    if (missingTrend.length) { setError(trendWorksheet.name, missingTrend); return; }
+  // Read one worksheet at a time — running two DataTableReader sessions
+  // concurrently (Promise.all) is a known rough edge in some Tableau builds
+  // and can surface as a generic "internal-error" from getSummaryDataReaderAsync.
+  readWorksheetRows(detailWorksheet)
+    .catch(err => { throw new Error(`Detail worksheet ("${detailWorksheet.name}"): ` + (err && err.message ? err.message : err)); })
+    .then(detail => readWorksheetRows(trendWorksheet)
+      .catch(err => { throw new Error(`Trend worksheet ("${trendWorksheet.name}"): ` + (err && err.message ? err.message : err)); })
+      .then(trend => [detail, trend]))
+    .then(([detail, trend]) => {
+      refreshQueued = false;
+      const missingDetail = findMissingFields(detail.fieldNames, DETAIL_FIELDS);
+      if (missingDetail.length) { setError(detailWorksheet.name, missingDetail); return; }
+      const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
+      if (missingTrend.length) { setError(trendWorksheet.name, missingTrend); return; }
 
-    clearError();
-    setStatus('');
-    const DATA = buildDashboardData(detail.rows, trend.rows);
-    renderDashboard(DATA);
-  }).catch(err => {
-    refreshQueued = false;
-    setStatus('');
-    document.getElementById('errorBanner').textContent = 'Failed to load data from Tableau: ' + (err && err.message ? err.message : err);
-    document.getElementById('errorBanner').style.display = 'block';
-  });
+      clearError();
+      setStatus('');
+      const DATA = buildDashboardData(detail.rows, trend.rows);
+      renderDashboard(DATA);
+    }).catch(err => {
+      refreshQueued = false;
+      setStatus('');
+      document.getElementById('errorBanner').textContent = 'Failed to load data from Tableau: ' + (err && err.message ? err.message : err);
+      document.getElementById('errorBanner').style.display = 'block';
+    });
 }
 
 function debounce(fn, ms) {
