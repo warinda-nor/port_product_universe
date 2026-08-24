@@ -398,12 +398,14 @@ function setStatus(msg) {
   el.textContent = msg;
   el.style.display = msg ? 'block' : 'none';
 }
-function setError(worksheetName, missingFields) {
+function setError(worksheetName, missingFields, actualFieldNames) {
   const el = document.getElementById('errorBanner');
   setStatus('');
   el.innerHTML = `Extension cannot load — worksheet "${worksheetName}" is missing required field(s):
     <ul class="field-error-list">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>
-    Rename the field in Tableau (or update the constant in index.html's FIELD lists) to match, then refresh.`;
+    Rename the field in Tableau (or update the constant in index.html's FIELD lists) to match, then refresh.
+    <details style="margin-top:8px"><summary>Fields Tableau actually returned for this worksheet</summary>
+    <ul class="field-error-list">${(actualFieldNames || []).map(f => `<li>${f}</li>`).join('')}</ul></details>`;
   el.style.display = 'block';
 }
 function clearError() {
@@ -1196,9 +1198,9 @@ function refreshData() {
     .then(([detail, trend]) => {
       refreshQueued = false;
       const missingDetail = findMissingFields(detail.fieldNames, DETAIL_FIELDS);
-      if (missingDetail.length) { setError(detailWorksheet.name, missingDetail); return; }
+      if (missingDetail.length) { setError(detailWorksheet.name, missingDetail, detail.fieldNames); return; }
       const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
-      if (missingTrend.length) { setError(trendWorksheet.name, missingTrend); return; }
+      if (missingTrend.length) { setError(trendWorksheet.name, missingTrend, trend.fieldNames); return; }
 
       clearError();
       setStatus('');
