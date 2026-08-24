@@ -417,18 +417,19 @@ function clearError() {
    ============================================================ */
 function readWorksheetRows(worksheet) {
   return worksheet.getSummaryDataReaderAsync(undefined, { ignoreSelection: true }).then(reader => {
-    const columns = reader.columns;
     const pageCount = reader.pageCount;
+    // Column info lives on each page (DataTable), not on the reader itself —
+    // every page carries the same columns, so just take them from the first one.
+    let columns = [];
     let allData = [];
     let chain = Promise.resolve();
     for (let i = 0; i < pageCount; i++) {
       chain = chain.then(() => reader.getPageAsync(i)).then(page => {
+        if (i === 0) columns = page.columns;
         allData = allData.concat(page.data);
       });
     }
     return chain.then(() => reader.releaseAsync()).then(() => {
-      const fieldIndex = {};
-      columns.forEach((c, i) => { fieldIndex[c.fieldName] = i; });
       const rows = allData.map(dataRow => {
         const obj = {};
         columns.forEach((c, i) => { obj[c.fieldName] = dataRow[i].value; });
