@@ -29,13 +29,13 @@ tableau.extensions.1.latest.js   Tableau Extensions API (index.html เรีย
 
 ขั้นตอนนี้ทำครั้งเดียวเพื่อให้ Tableau (ซึ่งต้องโหลด extension จาก URL แบบ `https://`) เข้าถึงไฟล์ `index.html` ได้
 
-1. เข้า repo บน GitHub: `https://github.com/warinda-nor/port_universe`
+1. เข้า repo บน GitHub: `https://github.com/warinda-nor/port_product_universe`
 2. ไปที่ **Settings → Pages**
 3. ที่ **Source** เลือก **Deploy from a branch**
 4. เลือก Branch เป็น **main** และ Folder เป็น **/ (root)** แล้วกด **Save**
 5. รอ 1–2 นาที ให้ GitHub Pages build เสร็จ แล้วเข้าไปเช็คที่:
    ```
-   https://warinda-nor.github.io/port_universe/universe-overview/index.html
+   https://warinda-nor.github.io/port_product_universe/universe-overview/index.html
    ```
    ถ้าเห็นข้อความ "This extension only renders inside a Tableau dashboard." แปลว่า deploy สำเร็จ
 

@@ -4,10 +4,10 @@
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
     <description>Universe Overview — Sales Performance dashboard by Universe tier (ECO / MASS / PREMIUM / LUXURY)</description>
-    <author name="Warinda" email="warinda.nor@boonthavorn.com" organization="Boonthavorn" website="https://github.com/warinda-nor/port_universe"/>
+    <author name="Warinda" email="warinda.nor@boonthavorn.com" organization="Boonthavorn" website="https://github.com/warinda-nor/port_product_universe"/>
     <min-api-version>1.4</min-api-version>
     <source-location>
-      <url>https://warinda-nor.github.io/port_universe/universe-overview/index.html</url>
+      <url>https://warinda-nor.github.io/port_product_universe/universe-overview/index.html</url>
     </source-location>
     <icon>iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAAdklEQVR4nK3MwQ3AIAwDQA/BAny7A3t10s7DAwlRCiGxK1my/Tlc99OSclGCDonWC1IspFx+sdBKt9CXaGE8ioXp09YM0dYC4qw1RFhbKGpZUMg6QH7rDDktF+SxvNDRCkC2FYMMKwztLAZaWiT0tXhosiRotCqtlnU8Dm8RHQAAAABJRU5ErkJggg==</icon>
     <permissions>
