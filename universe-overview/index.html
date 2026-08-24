@@ -608,21 +608,29 @@ function partsToISO(p) {
   return `${p.year}-${pad(p.month)}-${pad(p.day)}`;
 }
 
+// Trend's "Day Month" field turns out to be a text calculated field formatted
+// as "D-MonthName" (e.g. "1-April") with NO year in it at all — confirmed
+// against real Tableau data, not just a format mismatch. So it can only be
+// used to bucket rows into a calendar month, never to derive a real date;
+// the period/year for the header comes from the Start Date/End Date
+// Parameters instead (see readPeriodParameters below).
+function parseTrendMonthName(value) {
+  if (value == null) return null;
+  const m = String(value).trim().match(/^\d{1,2}\s*-\s*([A-Za-z]+)$/);
+  if (!m) return null;
+  return MONTH_NAMES.find(mn => mn.toLowerCase() === m[1].toLowerCase()) || null;
+}
+
 function aggregateTrend(rows) {
   const totals = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0 };
   const byMonth = {};      // month label -> {netSalesCY, netSalesLY, qtyCY, qtyLY}
   const byMonthUniverse = {}; // month label -> segment map
   const monthTotals = {};
-  const monthSortKey = {};
   const byFlagUniverse = {}, flagTotalsCY = {};
-  let minKey = null, maxKey = null, minParts = null, maxParts = null;
 
   rows.forEach(row => {
-    const parts = parseTableauDateParts(row['Day Month']);
-    if (!parts) return;
-    const dateKey = parts.year * 10000 + parts.month * 100 + parts.day;
-    if (minKey === null || dateKey < minKey) { minKey = dateKey; minParts = parts; }
-    if (maxKey === null || dateKey > maxKey) { maxKey = dateKey; maxParts = parts; }
+    const monthLabel = parseTrendMonthName(row['Day Month']);
+    if (!monthLabel) return;
 
     const universe = row['Universe'] || 'UNCLASSIFIED';
     const flagPb = row['Flag_PrivateBrand'];
@@ -640,10 +648,6 @@ function aggregateTrend(rows) {
       flagTotalsCY[flagPb] = (flagTotalsCY[flagPb] || 0) + netCY;
     }
 
-    const monthKey = parts.year * 100 + parts.month;
-    const monthLabel = MONTH_NAMES[parts.month - 1];
-    monthSortKey[monthLabel] = monthKey;
-
     if (!byMonth[monthLabel]) byMonth[monthLabel] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0 };
     const bm = byMonth[monthLabel];
     bm.netSalesCY += netCY; bm.netSalesLY += netLY; bm.qtyCY += qtyCY; bm.qtyLY += qtyLY;
@@ -653,7 +657,10 @@ function aggregateTrend(rows) {
     monthTotals[monthLabel] = (monthTotals[monthLabel] || 0) + netCY;
   });
 
-  const monthsPresent = Object.keys(byMonth).sort((a, b) => monthSortKey[a] - monthSortKey[b]);
+  // No year in "Day Month" to sort by — calendar month order is all we have,
+  // which is correct as long as the period stays within a single year
+  // (matches this dashboard's documented Jan–Jul scope).
+  const monthsPresent = Object.keys(byMonth).sort((a, b) => MONTH_NAMES.indexOf(a) - MONTH_NAMES.indexOf(b));
   const byMonthRows = monthsPresent.map(m => ({ month: m, ...byMonth[m] }));
   const byMonthUniverseRows = monthsPresent.map(m => ({ month: m, netSalesByUniverse: byMonthUniverse[m], total: monthTotals[m] }));
 
@@ -671,8 +678,6 @@ function aggregateTrend(rows) {
     byMonth: byMonthRows,
     byMonthUniverse: byMonthUniverseRows,
     byPrivateBrandUniverse,
-    periodStart: minParts ? partsToISO(minParts) : null,
-    periodEnd: maxParts ? partsToISO(maxParts) : null,
   };
 }
 
@@ -692,8 +697,8 @@ function buildDashboardData(detailRows, trendRows) {
     topProductsByUniverseQty: d.topProductsByUniverseQty,
     grandTotalNetSalesCY: d.grandTotalNetSalesCY,
     grandTotalSkuCY: d.grandTotalSkuCY,
-    periodStart: t.periodStart,
-    periodEnd: t.periodEnd,
+    periodStart: PERIOD_PARAMS.periodStart,
+    periodEnd: PERIOD_PARAMS.periodEnd,
   };
 }
 
@@ -1195,6 +1200,22 @@ let detailWorksheet = null;
 let trendWorksheet = null;
 let refreshQueued = false;
 
+// "Day Month" (Trend) has no year, so the header's period/year comes from
+// these two Parameters instead — they already have to exist on this
+// workbook, since the CY/LY calculated fields are themselves driven off them.
+let PERIOD_PARAMS = { periodStart: null, periodEnd: null };
+function readPeriodParameters(dashboard) {
+  return dashboard.getParametersAsync().then(params => {
+    const startParam = params.find(p => p.name === 'Start Date');
+    const endParam = params.find(p => p.name === 'End Date');
+    const startParts = startParam ? parseTableauDateParts(startParam.currentValue.value) : null;
+    const endParts = endParam ? parseTableauDateParts(endParam.currentValue.value) : null;
+    PERIOD_PARAMS.periodStart = startParts ? partsToISO(startParts) : null;
+    PERIOD_PARAMS.periodEnd = endParts ? partsToISO(endParts) : null;
+    return { startParam, endParam };
+  });
+}
+
 function refreshData() {
   if (refreshQueued) return;
   refreshQueued = true;
@@ -1214,17 +1235,17 @@ function refreshData() {
       const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
       if (missingTrend.length) { setError(trendWorksheet.name, missingTrend, trend.fieldNames); return; }
 
-      // The field exists, but if none of its values parse as a date every
-      // Trend row silently drops out of aggregation (KPI/monthly totals all
-      // land on 0 with no error) — catch that case explicitly and show what
-      // Tableau actually sent, instead of a dashboard full of zeroes.
+      // The field exists, but if none of its values parse as "D-MonthName"
+      // every Trend row silently drops out of aggregation (KPI/monthly totals
+      // all land on 0 with no error) — catch that case explicitly and show
+      // what Tableau actually sent, instead of a dashboard full of zeroes.
       if (trend.rows.length) {
-        const parsedCount = trend.rows.reduce((n, r) => n + (parseTableauDateParts(r['Day Month']) ? 1 : 0), 0);
+        const parsedCount = trend.rows.reduce((n, r) => n + (parseTrendMonthName(r['Day Month']) ? 1 : 0), 0);
         if (parsedCount === 0) {
           const samples = trend.rows.slice(0, 3).map(r => JSON.stringify(r['Day Month']));
           document.getElementById('errorBanner').innerHTML =
-            `Extension cannot load — "Day Month" values in worksheet "${trendWorksheet.name}" don't look like a date ` +
-            `(expected something starting with <code>YYYY-MM-DD</code>). Sample raw value(s) Tableau sent: <code>${samples.join(', ')}</code>. ` +
+            `Extension cannot load — "Day Month" values in worksheet "${trendWorksheet.name}" don't look like a "D-MonthName" ` +
+            `string (expected e.g. <code>1-April</code>). Sample raw value(s) Tableau sent: <code>${samples.join(', ')}</code>. ` +
             `Check the field's data type/format in Tableau, then refresh.`;
           document.getElementById('errorBanner').style.display = 'block';
           setStatus('');
@@ -1292,7 +1313,11 @@ tableau.extensions.initializeAsync().then(() => {
     trendWorksheet.addEventListener(tableau.TableauEventType.FilterChanged, debouncedRefresh);
     trendWorksheet.addEventListener(tableau.TableauEventType.SummaryDataChanged, debouncedRefresh);
 
-    refreshData();
+    return readPeriodParameters(dashboard).then(({ startParam, endParam }) => {
+      if (startParam) startParam.addEventListener(tableau.TableauEventType.ParameterChanged, debouncedRefresh);
+      if (endParam) endParam.addEventListener(tableau.TableauEventType.ParameterChanged, debouncedRefresh);
+      refreshData();
+    });
   });
 }).catch(err => {
   setStatus('');
