@@ -1214,6 +1214,24 @@ function refreshData() {
       const missingTrend = findMissingFields(trend.fieldNames, TREND_FIELDS);
       if (missingTrend.length) { setError(trendWorksheet.name, missingTrend, trend.fieldNames); return; }
 
+      // The field exists, but if none of its values parse as a date every
+      // Trend row silently drops out of aggregation (KPI/monthly totals all
+      // land on 0 with no error) — catch that case explicitly and show what
+      // Tableau actually sent, instead of a dashboard full of zeroes.
+      if (trend.rows.length) {
+        const parsedCount = trend.rows.reduce((n, r) => n + (parseTableauDateParts(r['Day Month']) ? 1 : 0), 0);
+        if (parsedCount === 0) {
+          const samples = trend.rows.slice(0, 3).map(r => JSON.stringify(r['Day Month']));
+          document.getElementById('errorBanner').innerHTML =
+            `Extension cannot load — "Day Month" values in worksheet "${trendWorksheet.name}" don't look like a date ` +
+            `(expected something starting with <code>YYYY-MM-DD</code>). Sample raw value(s) Tableau sent: <code>${samples.join(', ')}</code>. ` +
+            `Check the field's data type/format in Tableau, then refresh.`;
+          document.getElementById('errorBanner').style.display = 'block';
+          setStatus('');
+          return;
+        }
+      }
+
       clearError();
       setStatus('');
       const DATA = buildDashboardData(detail.rows, trend.rows);
