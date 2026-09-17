@@ -33,28 +33,10 @@
     --tt-good:         #0a7a2e;
     --tt-bad:          #c22f2f;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) {
-      color-scheme: dark;
-      --page:            #0d0d0d;
-      --surface-1:       #1a1a19;
-      --text-primary:    #ffffff;
-      --text-secondary:  #c3c2b7;
-      --text-muted:      #898781;
-      --grid:            #2c2c2a;
-      --baseline:        #383835;
-      --border:          rgba(255,255,255,0.10);
-      --series-accent:   #3987e5;
-      --good:            #0ca30c;
-      --critical:        #e66767;
-      --navy:            #0c1424;
-      --navy-2:          #14213d;
-      --uni-eco:         #90dbc7;
-      --uni-mass:        #86c6f2;
-      --uni-premium:     #ffdbc0;
-      --uni-luxury:      #d3b3e9;
-    }
-  }
+  /* Always default to Light — intentionally no @media (prefers-color-scheme: dark)
+     block, so the dashboard ignores the viewing device's OS/browser theme setting.
+     :root[data-theme="dark"] is kept below as a manual opt-in only, for a future
+     in-page toggle if one gets added; nothing sets that attribute today. */
   :root[data-theme="dark"] {
     color-scheme: dark;
     --page:            #0d0d0d;
@@ -1062,7 +1044,7 @@ function renderTopProducts(DATA) {
 /* ---------------- Sales by Universe donut ---------------- */
 function renderUniverseDonut(containerId, allRows) {
   const el = document.getElementById(containerId);
-  const rows = UNIVERSES.map(u => allRows.find(r => r.universe === u)).filter(Boolean);
+  const rows = UNIVERSE_KEYS.map(u => allRows.find(r => r.universe === u)).filter(Boolean);
   const total = rows.reduce((s, r) => s + r.netSalesCY, 0);
   if (!total) { el.innerHTML = '<p class="sub">No data.</p>'; return; }
 
@@ -1148,7 +1130,7 @@ function renderUniverseDonut(containerId, allRows) {
       <div class="tt-row"><span>Net Sales (CY)</span><b>${fmtM(s.r.netSalesCY)}M</b></div>
       <div class="tt-row"><span>Net Sales (LY)</span><b>${fmtM(s.r.netSalesLY)}M</b></div>
       <div class="tt-row"><span>Growth vs LY</span><b class="${growthClass(g)}">${arrow(g)} ${fmtPct(Math.abs(g), 2)}</b></div>
-      <div class="tt-row"><span>Share (of 4 known tiers)</span><b>${fmtPct(s.share, 2)}</b></div>
+      <div class="tt-row"><span>Share of Net Sales</span><b>${fmtPct(s.share, 2)}</b></div>
     `;
     segEl.addEventListener('mouseenter', e => showTooltip(e.clientX, e.clientY, html));
     segEl.addEventListener('mousemove', e => showTooltip(e.clientX, e.clientY, html));
