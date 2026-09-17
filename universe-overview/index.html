@@ -165,7 +165,7 @@
   .kpi-delta.bad { color: var(--critical); }
   .kpi-prior { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-  #table-universe { overflow-x: auto; }
+  #table-universe { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; overflow-x: auto; }
   #table-universe .uni-tag { font-weight: 400; }
   #table-universe .growth.good, #table-universe .growth.bad { font-weight: 400; }
   #table-topProducts { overflow-x: auto; }
@@ -1083,7 +1083,7 @@ function renderUniverseDonut(containerId, allRows) {
   const labelR1 = R + 10;
   const labelR2 = R + 44;
   const horiz = 34;
-  const MIN_LABEL_GAP = 58; // block height of the 2-line label (title + net-sales line)
+  const MIN_LABEL_GAP = 70; // block height of the 2-line label (title + net-sales line), plus a little breathing room
 
   const labelPts = slices.map(s => {
     const mid = (s.startFrac + s.share / 2) * 2 * Math.PI - Math.PI / 2;
