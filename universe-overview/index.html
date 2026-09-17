@@ -457,6 +457,14 @@ function addTo(map, key) {
 }
 function num(v) { return (typeof v === 'number' && !isNaN(v)) ? v : 0; }
 
+// Any row whose Universe isn't exactly one of the 4 known tiers must fold into
+// UNCLASSIFIED — not just blank/null values. `row['Universe'] || 'UNCLASSIFIED'`
+// only catches falsy values, so a stray/unexpected string (e.g. a typo, a filtered-
+// out category label) fell through the `byUniverse[universe]` lookup below and got
+// silently dropped from every total instead of landing in UNCLASSIFIED, making the
+// Detail-based totals undercount vs. the Trend-based KPI totals.
+function normalizeUniverse(raw) { return UNIVERSES.includes(raw) ? raw : 'UNCLASSIFIED'; }
+
 function aggregateDetail(rows) {
   const byUniverse = {};
   UNIVERSE_KEYS.forEach(u => { byUniverse[u] = { netSalesCY: 0, netSalesLY: 0, qtyCY: 0, qtyLY: 0, skuCy: new Set(), skuLy: new Set() }; });
@@ -472,7 +480,7 @@ function aggregateDetail(rows) {
   rows.forEach(row => {
     if (row['Sls Grp Desc'] === 'Grand Total') return; // stray pivot-export total row, if present
 
-    const universe = row['Universe'] || 'UNCLASSIFIED';
+    const universe = normalizeUniverse(row['Universe']);
     const pg = row['Product Group'];
     const pgMer = row['Product Group Mer'];
     const brand = row['Brand'];
@@ -614,7 +622,7 @@ function aggregateTrend(rows) {
     const monthLabel = parseTrendMonthName(row['Day Month']);
     if (!monthLabel) return;
 
-    const universe = row['Universe'] || 'UNCLASSIFIED';
+    const universe = normalizeUniverse(row['Universe']);
     const flagPb = row['Flag_PrivateBrand'];
     const netCY = num(row['Net Inc Tax - CY']);
     const netLY = num(row['Net Inc Tax - LY']);
